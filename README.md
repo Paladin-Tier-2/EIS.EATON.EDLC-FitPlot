@@ -24,7 +24,10 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 - **MATLAB**: MATLAB for plotting the results.
 - **Dependencies**: Install any necessary Python libraries using `pip install -r requirements.txt`.
 
-## Getting Started
+## Getting Started with impedance.py
+For detailed instructions on setting up and using `impedance.py`, including installing Miniconda, creating a conda environment, and installing necessary packages, please refer to the [impedance.py Getting Started Guide](https://impedancepy.readthedocs.io/en/latest/getting-started.html).
+
+### Quick Setup
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/yourusername/EIS_EATON_EDLC_FittingAndPlotting.git
