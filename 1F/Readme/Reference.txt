@@ -1,0 +1,10 @@
+>To use this script, ensure each SOC has its own folder -- see the image for reference
+>You need to have the addon professional plots installed
+> The files have to have state of charge in them plus SOC e.g 40SOC 
+>>>> no space between the number and string 'SOC'
+> When exporting through the XM-ECS, Export All
+> Adjust the legend box yourself --- 
+>>>get( ##name of legend###) 
+>>>>>>>>Copy the positon 
+>>>set(leg2, 'Position', [x y w h]);  % Adjust position as needed
+

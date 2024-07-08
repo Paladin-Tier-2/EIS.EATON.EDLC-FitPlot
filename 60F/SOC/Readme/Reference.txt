@@ -1,0 +1,2 @@
+>To use this script, ensure each SOC has its own folder -- see the image for reference
+>You need to have the addon professional plots installed
