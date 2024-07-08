@@ -1,4 +1,4 @@
-# EIS_EATON_EDLC_FittingAndPlotting
+# EIS EATON EDLC Fitting And Plotting
 
 ## Overview
 This project is designed to facilitate the processing, fitting, and plotting of Electrochemical Impedance Spectroscopy (EIS) data specifically for EDLC (Electric Double Layer Capacitor) devices from EATON. The data is sourced from Solatron files and processed using the `impedance.py` script. The script provides an automated fitting solution across various States of Charge (SOC) for a given architecture. MATLAB is utilized for extensive and detailed plotting of the results.
