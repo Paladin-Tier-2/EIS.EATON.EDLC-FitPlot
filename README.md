@@ -9,9 +9,9 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 - **Advanced Plotting**: MATLAB provides extensive plotting capabilities, allowing for detailed visualization of the fitting results across different SOCs.
 
 ## Directory Structure
-- **1F**: Contains data and results for the 1F EDLC device.
-- **400F**: Contains data and results for the 400F EDLC device.
-- **60F**: Contains data and results for the 60F EDLC device.
+- **1F**: Contains data and results for the 1F EDLC device. This includes the fitting and plotting 
+- **400F**: Contains data and results for the 400F EDLC device. This includes the fitting and plotting 
+- **60F**: Contains data and results for the 60F EDLC device.  This includes the fitting and plotting 
 - **README.md**: This file.
 
 ## Usage
@@ -26,6 +26,9 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 
 ## Getting Started with impedance.py
 For detailed instructions on setting up and using `impedance.py`, including installing Miniconda, creating a conda environment, and installing necessary packages, please refer to the [impedance.py Getting Started Guide](https://impedancepy.readthedocs.io/en/latest/getting-started.html).
+## Using Visual Studio with Impedance.py 
+To be able to use impedance.py with VS Code ( VS code being your conda environment ) 
+follow this guide [Setting up Miniconda in VS Code](https://youtu.be/U3VAqCTujpg?si=bYmLjrdf4VCbd4kI) once after installing impedance.py with ```pip install impedance ``` in your desginated terminal.
 
 ### Quick Setup
 1. **Clone the Repository**:
