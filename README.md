@@ -9,9 +9,9 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 - **Advanced Plotting**: MATLAB provides extensive plotting capabilities, allowing for detailed visualization of the fitting results across different SOCs.
 
 ## Directory Structure
-- **1F**: Contains data and results for the 1F EDLC device.
-- **400F**: Contains data and results for the 400F EDLC device.
-- **60F**: Contains data and results for the 60F EDLC device.
+- **1F**: Contains data and results for the 1F EDLC device. This includes the fitting and plotting 
+- **400F**: Contains data and results for the 400F EDLC device. This includes the fitting and plotting 
+- **60F**: Contains data and results for the 60F EDLC device.  This includes the fitting and plotting 
 - **README.md**: This file.
 
 ## Usage
