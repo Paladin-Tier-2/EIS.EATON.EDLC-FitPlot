@@ -3,8 +3,8 @@ import glob
 import pandas as pd
 import numpy as np
 
-# Define the path to the root folder
-root_folder_path = 'C:/Users/DankyATM/Downloads/400F/SOC/'
+# Define the path to the root folder --- change it hereee
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # List to store all the data
 all_data = []

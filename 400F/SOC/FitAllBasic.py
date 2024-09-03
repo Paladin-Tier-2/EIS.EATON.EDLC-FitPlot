@@ -17,9 +17,8 @@ initial_guess = [2.51869225e-05, 4.23861845e-04, 2.86551216e-01, 7.76924634e+02,
 bounds = ([0,0,0,0, 0.5,0,1e-1,0.5 ], [10e-2,np.inf,np.inf, 10000 ,1 ,100 ,1e6 ,1 ])
 
 
-
-# Define the path to the root folder --- change it hereee
-root_folder_path = 'C:/Users/DankyATM/Downloads/400F/SOC'
+# Define the path to the root folder
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # Loop through each subfolder in the root folder
 for subfolder in glob.glob(os.path.join(root_folder_path, '*SOC')):

@@ -7,7 +7,11 @@ omitDefinput = {'0,40'};
 omitAnswer = inputdlg(omitPrompt, omitDlgtitle, [1 50], omitDefinput);
 
 % Convert the input string to an array of numbers
-omitSOC = str2double(omitAnswer{1});
+if isempty(omitAnswer) || isempty(omitAnswer{1})
+    omitSOC = [];  % No values to omit if input is empty
+else
+    omitSOC = str2double(strsplit(omitAnswer{1}, ','));  % Split string by commas and convert to numeric array
+end
 
 % Define the root folder where all SOC subfolders are located
 rootFolder = pwd;
@@ -69,8 +73,8 @@ for k = 1:length(socFolders)
         
         socPercentagesMeasured{end+1} = [num2str(SOC) '% SOC'];
         socPercentagesFitted{end+1} = [num2str(SOC) '% SOC (Fit)'];
-        inputFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Python.csv',capNumber, SOC));
-        fitFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Fit.csv',capNumber, SOC));
+        inputFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Python.csv', capNumber, SOC));
+        fitFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Fit.csv', capNumber, SOC));
     else
         warning('No valid SOC percentage found in the folder name: %s', socFolders(k).name);
         continue;
@@ -124,21 +128,12 @@ xlabel('Real Part [m$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize); %
 ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize);
 title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
 grid on;
-  xlim([min_x_value, max_x_value]);
-  ylim([min_y_value, 0]);
-
-  %  ylim([-0.0045, 0]);
-  % xlim([0,12e-3 ]);
-
-  % % % Higher Freq
-  % xlim([0.0017,0.0035])
-  % ylim([-0.0021,0])
-
+xlim([min_x_value, max_x_value]);
+ylim([min_y_value, 0]);
 
 % Set axis properties
 set(gca, 'YDir', 'reverse', 'FontSize', fontSize, 'LineWidth', 1.5, 'GridColor', 'k', 'GridAlpha', 0.6);
 set(gca, 'XColor', 'k', 'YColor', 'k'); % Set tick color
-% set(gca, 'XTickLabel', get(gca, 'XTickLabel'), 'YTickLabel', get(gca, 'YTickLabel'));
 set(gcf, 'Color', 'w');
 ax = gca;
 ax.GridColor = [0, 0, 0];
@@ -165,14 +160,19 @@ FiguresFol = 'Figures';
 if exist(FiguresFol, 'dir')
    fprintf('Folder "%s" already exists.\n', FiguresFol);
 else
- mkdir(FiguresFol);
+   mkdir(FiguresFol);
 end
 
+
 % Construct the filename with capNumber
+if(isempty(omitSOC))
 outputFileName = sprintf('%s/SOC-Fit%sF_FullSpectrum.pdf', FiguresFol, capNumber);
+else
+outputFileName = sprintf('%s/SOC-Fit%sF_Omitted.pdf', FiguresFol, capNumber);
+end
 
 % Save the figure
-  % SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');
+ SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');
 
 % Display the tracked min and max values
 disp(['Minimum y (imaginary part) value: ', num2str(min_y_value)]);

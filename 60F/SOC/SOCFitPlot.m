@@ -109,10 +109,22 @@ xlabel('Real Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize); % 
 ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize);
 title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
 grid on;
-  % ylim([min_y_value, 0]);
-  % xlim([min_x_value, max_x_value]);
-   ylim([-0.002, 0]);
-   xlim([min_x_value, 0.008]);
+
+
+isZoomed = true;
+
+ if isZoomed
+      ylim([-0.010, 0]);
+      xlim([min_x_value, 0.015]);
+ else
+      ylim([min_y_value, 0]);
+      xlim([min_x_value, max_x_value]); 
+
+ end
+   
+
+   % ylim([-0.002, 0]);
+   % xlim([min_x_value, 0.008]);
 
 
 
@@ -151,8 +163,12 @@ else
  mkdir(FiguresFol);
 end
 
-% Construct the filename with capNumber
-outputFileName = sprintf('%s/SOC-FitZoomed%sF.pdf', FiguresFol, capNumber);
+% Define the output filename based on the zoom status
+if isZoomed
+    outputFileName = sprintf('%s/SOC-FitZoomed%sF.pdf', FiguresFol, capNumber);
+else
+    outputFileName = sprintf('%s/SOC-Fit%sF.pdf', FiguresFol, capNumber);
+end
 
 % Save the figure
 SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');

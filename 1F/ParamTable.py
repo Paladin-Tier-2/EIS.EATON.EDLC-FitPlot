@@ -3,8 +3,8 @@ import glob
 import pandas as pd
 import numpy as np
 
-# Define the path to the root folder
-root_folder_path = 'C:/Users/DankyATM/Downloads/1F/'
+# Define the path to the root folder --- change it hereee
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # Parameters of interest --- it looks for this
 parameters = ['R_0', 'B_1_0', 'B_1_1', 'B_1_2', 'B_1_3', 'B_1_4']

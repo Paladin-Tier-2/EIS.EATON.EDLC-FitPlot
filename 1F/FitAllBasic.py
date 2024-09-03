@@ -20,7 +20,7 @@ bounds = ([1e-2,0, 0, 0, 0.5, 0,1e-1,0.5], [10e-2,np.inf,np.inf, 10 ,1 ,0.1 ,1e3
 cutoff_frequency = 100e-3  # in Hz
 
 # Define the path to the root folder --- change it hereee
-root_folder_path = 'C:/Users/DankyATM/Downloads/1F/'
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # Loop through each subfolder in the root folder
 for subfolder in glob.glob(os.path.join(root_folder_path, '*SOC')):

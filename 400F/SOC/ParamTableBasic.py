@@ -3,8 +3,8 @@ import glob
 import pandas as pd
 import numpy as np
 
-# Define the path to the root folder
-root_folder_path = 'C:/Users/DankyATM/Downloads/400F/SOC'
+# Define the path to the root folder --- change it hereee
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # Parameters of interest --- it looks for this
 parameters = ['R_s', 'Wo_Zo',  'Wo_T', 'CPE_H', 'alpha_H','R_int','CPE_ads','alpha_ads']

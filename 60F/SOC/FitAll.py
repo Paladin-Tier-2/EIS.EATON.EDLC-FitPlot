@@ -32,8 +32,8 @@ circuit = 'R_0-B_1'
 # Initial guesses for parameters excluding the constants
 initial_guess = [7.43197184e-03, 112e-3, 1e32, 60, 9.62423346e-01, 1]
 
-# Define the path to the root folder
-root_folder_path = 'C:/Users/DankyATM/Downloads/60F/SOC/'
+# Define the path to the root folder --- change it hereee
+root_folder_path = os.path.dirname(os.path.realpath(__file__))
 
 # Loop through each subfolder in the root folder
 for subfolder in glob.glob(os.path.join(root_folder_path, '*SOC')):
