@@ -35,3 +35,8 @@ follow this guide [Setting up Miniconda in VS Code](https://youtu.be/U3VAqCTujpg
    ```bash
    git clone https://github.com/yourusername/EIS_EATON_EDLC_FittingAndPlotting.git
    cd EIS_EATON_EDLC_FittingAndPlotting
+
+
+
+##
+Name the circuit element that is associated with ESR as 'R_0' for Bisquert Open Circuits
