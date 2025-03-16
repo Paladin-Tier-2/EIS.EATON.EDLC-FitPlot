@@ -22,6 +22,7 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 ## Requirements
 - **Python**: Ensure you have Python installed.
 - **MATLAB**: MATLAB for plotting the results.
+--- MATLAB: Professional Plots Addon 
 - **Dependencies**: Install any necessary Python libraries using `pip install -r requirements.txt`.
 
 ## Getting Started with impedance.py
