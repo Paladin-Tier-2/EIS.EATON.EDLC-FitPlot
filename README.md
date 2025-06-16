@@ -27,8 +27,8 @@ This project is designed to facilitate the processing, fitting, and plotting of 
 
 ## Getting Started with impedance.py
 For detailed instructions on setting up and using `impedance.py`, including installing Miniconda, creating a conda environment, and installing necessary packages, please refer to the [impedance.py Getting Started Guide](https://impedancepy.readthedocs.io/en/latest/getting-started.html).
-## Using Visual Studio with Impedance.py 
-To be able to use impedance.py with VS Code ( VS code being your conda environment ) 
+## Using VSCode with Impedance.py 
+To be able to use impedance.py with VS Code ( VS code & a conda environment ) 
 follow this guide [Setting up Miniconda in VS Code](https://youtu.be/U3VAqCTujpg?si=bYmLjrdf4VCbd4kI) once after installing impedance.py with ```pip install impedance ``` in your desginated terminal.
 
 ### Quick Setup
