@@ -1,5 +1,7 @@
 clear; clc; close all;
 
+prompt = false;
+locationFolder = false;
 
 % =========  make the script location-independent  =======================
 scriptDir  = fileparts(mfilename('fullpath'));          % where this .m lives
@@ -32,14 +34,18 @@ rootFolder   = pwd;         % keep the variable name that the old code expects
 % ========================================================================
 
 
- % Prompt user to input SOC values to omit
- omitPrompt = {'Enter SOC values to omit (comma-separated, e.g., 0,40):'};
- omitDlgtitle = 'Omit SOC Values';
- omitDefinput = {'0,40'};
- omitAnswer = inputdlg(omitPrompt, omitDlgtitle, [1 50], omitDefinput);
- 
- % Convert the input string to an array of numbers
- omitSOC = str2num(omitAnswer{1});
+ if (prompt)
+     omitPrompt = {'Enter SOC values to omit (comma-separated, e.g., 0,40):'};
+     omitDlgtitle = 'Omit SOC Values';
+     omitDefinput = {'0,40'};
+     omitAnswer = inputdlg(omitPrompt, omitDlgtitle, [1 50], omitDefinput);
+     
+     % Convert the input string to an array of numbers
+     omitSOC = str2num(omitAnswer{1});
+ else
+     omitSOC = [];
+ end
+
 
  % Define the frequencies to mark (in Hz)
 markFrequencies = [31600, 630,1,0.5,15e-3,100e-3,15e-3,10e-3];
@@ -69,10 +75,9 @@ socFolders = socFolders(order);
 
 % Initialize the plot standards
 PS = PLOT_STANDARDS();
-fig1_comps.fig = gcf;
-fontSize = 30;
-tickFontSize = 15; % Increase font size for tick labels
-tickLineWidth = 10; % Increase line width for ticks
+fig1_comps.fig = figure('Units','centimeters', ...
+                        'Position',[0 0 8 8], ...   % 8 cm × 8 cm
+                        'Color','w');               % white canvas
 
 % Define the custom colors based on the provided palette
 colors = {PS.DRed4, PS.DOrange2, PS.MyGreen4, PS.Blue1, PS.MyBlue4, PS.DBlue1}; 
@@ -88,10 +93,6 @@ min_y_value = inf;
 max_x_value = -inf;
 min_x_value = inf;
 
-% Initialize cell arrays to store frequency data and all data
-frequencyData = {};
-allData = {};
-oneHzPoints = [];
 
 % Loop through each SOC folder to read and plot data
 for k = 1:length(socFolders)
@@ -127,25 +128,20 @@ for k = 1:length(socFolders)
     freq = data(:,1);
     real_part = data(:, 2);
     imaginary_part = data(:, 3);
+
+    % ----- convert Ω → mΩ ----------------------------------------------------
+    real_part       = real_part * 1e3;         
+    imaginary_part  = imaginary_part * 1e3;
+
     
-    % Store data for custom data cursor function
-    allData{k} = data;
-    frequencyData{k} = freq;
 
     % Update min_y_value and max_x_value
     min_y_value = min(min_y_value, min(imaginary_part));
     max_x_value = max(max_x_value, max(real_part));
     min_x_value = min(min_x_value, min(real_part));
 
-    for j = 1:length(markFrequencies)
-    freqIndex = find(abs(freq - markFrequencies(j)) <= tolFreq(j), 1);
-      if ~isempty(freqIndex)
-        markedPoints{j} = [markedPoints{j}; real_part(freqIndex), imaginary_part(freqIndex)];
-        fprintf('Found point at %g Hz for SOC %d%%: (%.4f, %.4f)\n', markFrequencies(j), SOC, real_part(freqIndex), imaginary_part(freqIndex));
-     else
-        warning('Point not found at %g Hz for SOC %d%%', markFrequencies(j), SOC);
-     end
-    end
+    
+
  
     % Plot the measured data
     plot(real_part, imaginary_part, 'LineStyle', '--', 'LineWidth', 3, ...
@@ -153,51 +149,53 @@ for k = 1:length(socFolders)
         'MarkerFaceColor', colors{k}, 'MarkerEdgeColor', colors{k}, 'Color', colors{k});
 
     % Add legend entry for the current SOC value
-    legendEntries{end+1} = sprintf('%d%% SOC', SOC);
+    legendEntries{end+1} = sprintf('%d%%', SOC);
+
+
+    % ---- boxed frequency annotations ---------------------------------------
+    for j = 1:numel(markFrequencies)
+        if ~isempty(markedPoints{j})
+         p   = markedPoints{j}(1,:);                 % first SOC occurrence
+            txt = sprintf('%g\\,Hz',markFrequencies(j));
+    
+            text(p(1),p(2),txt, ...
+                 'Interpreter','latex', ...
+                 'FontSize',14, ...
+                 'HorizontalAlignment','center', ...
+                 'VerticalAlignment','bottom', ...
+                 'BackgroundColor','w', ...             % white fill
+                 'Margin',2, ...
+                 'EdgeColor','k', ...                   % black border
+                 'LineWidth',0.75);
+        end
+    end
+
 end
 
 % Customize the figure
-xlabel('Real Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'LineWidth', tickLineWidth); 
-ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'LineWidth', tickLineWidth);
-title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
-grid on;
-   
-% Set axis properties
-set(gca, 'YDir', 'reverse', 'FontSize', tickFontSize, 'LineWidth', tickLineWidth, 'GridColor', [0, 0, 0] , 'GridAlpha', 0.8);
-set(gca, 'XColor', [0, 0, 0], 'YColor', [0, 0, 0]); % Set tick color
-set(gcf, 'Color', 'w');
-ax = gca;
-ax.GridColor = [0, 0, 0];
-ax.GridAlpha = 0.9;
-ax.LineWidth = 5;
-ax.XAxis.LineWidth = tickLineWidth; % Thicker x-axis
-ax.YAxis.LineWidth = tickLineWidth; % Thicker y-axis
+xlabel('Real Part [m$\Omega$]','Interpreter','latex');
+ylabel('-Imaginary Part [m$\Omega$]','Interpreter','latex');
+
+set(gca, 'YDir', 'reverse') 
+grid on; 
+
+% ylim([min_y_value, 0])
+% xlim([min_x_value, max_x_value]);
+
+xlim([2,4.2]);
+ylim([min_y_value, 0]);
+
+lgd = legend(legendEntries,'Location','northwest', ...
+             'FontSize',24,'Box','on');          % ← no ItemTokenSize here
+if isprop(lgd,'ItemTokenSize')                   % R2019b+ supports it
+    lgd.ItemTokenSize = [18 6];
+end
 
 
- %  ylim([min_y_value, 0])
- %  xlim([min_x_value, max_x_value]);
-      
-    xlim([min_x_value, 0.0135]);
-    ylim([-0.01, 0]);
-
-% Add legend
-legend(legendEntries, 'Location', 'northwest', 'FontSize', fontSize);
 
 % Standardize the figure
 STANDARDIZE_FIGURE(fig1_comps);
 
-
-% Connect the points close to the specified frequencies and add labels
-for j = 1:length(markedPoints)
-    if ~isempty(markedPoints{j})
-        plot(markedPoints{j}(:, 1), markedPoints{j}(:, 2), 'k--o', 'LineWidth', 2);
-        text(markedPoints{j}(1, 1), markedPoints{j}(1, 2), sprintf('%g Hz', markFrequencies(j)), ...
-            'VerticalAlignment', 'cap', 'HorizontalAlignment', 'right', 'Color', 'k', 'FontSize', 18, 'FontWeight', 'bold');
-        fprintf('Connected points close to %g Hz and added a label.\n', markFrequencies(j));
-    else
-        warning('No points found for frequency %g Hz.', markFrequencies(j));
-    end
-end
 
 
 % Define the folder name
@@ -211,29 +209,41 @@ end
 
 % Construct the filename with capNumber
 outputFileName = sprintf('%s/SOC-%sF_Zoomed.pdf', FiguresFol, capNumber);
-     SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');
+exportgraphics(fig1_comps.fig,outputFileName, ...
+               'ContentType','vector', ...   % PDF/SVG – grid never blurs
+               'BackgroundColor','none');
 
 
-% Custom data cursor update function
-function txt = myupdatefcn(~, event_obj, frequencyData, allData)
-    pos = get(event_obj, 'Position');
-    index = get(event_obj, 'DataIndex');
-    
-    % Determine which dataset is being referenced
-    freq = NaN;
-    for k = 1:length(allData)
-        real_part = allData{k}(:, 2);
-        imaginary_part = allData{k}(:, 3);
-        if ismember(pos(1), real_part) && ismember(pos(2), imaginary_part)
-            freq = frequencyData{k}(index);
-            break;
-        end
+function SET_NYQUIST_STYLE(ax)
+    % ----- global look -----
+    fnt  = 24;          % axis/legend font
+    tfnt = 18;          % tick-label font
+    lnW  = 1.25;        % axis & grid line width (pt)
+
+    % ----- axes & grid -----
+    set(ax,'FontName','Times New Roman', ...
+           'FontSize',tfnt, ...
+           'LineWidth',lnW, ...
+           'TickDir','out', ...
+           'Box','on', ...
+           'XGrid','on','YGrid','on', ...
+           'GridAlpha',0.8,'MinorGridAlpha',0.3, ...
+           'GridLineStyle','-');
+
+    % fixed 1:1 aspect so all plots line up visually
+    ax.PlotBoxAspectRatio = [1 1 1];
+
+    % ----- labels -----
+    ax.XLabel.FontSize = fnt;
+    ax.YLabel.FontSize = fnt;
+
+    % ----- legend (if it already exists) -----
+    lgd = findobj(ax.Parent,'Type','Legend');
+    if ~isempty(lgd)
+        set(lgd,'FontSize',fnt,'Box','on','ItemTokenSize',[18 6]);
     end
-    
-    txt = {['X: ', num2str(pos(1))], ...
-           ['Y: ', num2str(pos(2))], ...
-           ['Frequency: ', num2str(freq)]};
 end
+
 
 % ===== helper: climb until we hit repo root (.git or "-main") ===========
 function root = findRepoRoot(startDir)
@@ -251,14 +261,3 @@ function root = findRepoRoot(startDir)
         d = parent;                            % go one level up
     end
 end
-
-
-
-
-
-% Add data cursor mode
-datacursormode on;
-dcm_obj = datacursormode(gcf);
-set(dcm_obj, 'UpdateFcn', {@myupdatefcn, frequencyData, allData});
-
-

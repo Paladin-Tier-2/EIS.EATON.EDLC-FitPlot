@@ -75,7 +75,7 @@ for k = 1:length(socFolders)
         socPercentagesFitted{end+1} = [num2str(SOC) '% SOC (Fit)'];
         inputFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Python.csv', capNumber, SOC));
         fitFile = fullfile(socFolderPath, sprintf('%sF-%d%%SOC_Fit.csv', capNumber, SOC));
-    else
+    `else
         warning('No valid SOC percentage found in the folder name: %s', socFolders(k).name);
         continue;
     end

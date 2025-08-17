@@ -1,4 +1,6 @@
 clear; clc; close all;
+prompt = false;
+locationFolder = false;
 
 
 % =========  make the script location-independent  =======================
@@ -33,23 +35,19 @@ rootFolder   = pwd;         % keep the variable name that the old code expects
 
 
  % Prompt user to input SOC values to omit
- omitPrompt = {'Enter SOC values to omit (comma-separated, e.g., 0,40):'};
- omitDlgtitle = 'Omit SOC Values';
- omitDefinput = {'0,40'};
- omitAnswer = inputdlg(omitPrompt, omitDlgtitle, [1 50], omitDefinput);
- 
- % Convert the input string to an array of numbers
- omitSOC = str2num(omitAnswer{1});
-
- % Define the frequencies to mark (in Hz)
-markFrequencies = [31600, 630,1,0.5,15e-3,100e-3,15e-3,10e-3];
-%%% Tolerance to find the frequence
-tolFreq = [1e3,50,5,1e-3,0.2,10e-3,1.5e-3,0e-3];
+ if (prompt)
+     omitPrompt = {'Enter SOC values to omit (comma-separated, e.g., 0,40):'};
+     omitDlgtitle = 'Omit SOC Values';
+     omitDefinput = {'0,40'};
+     omitAnswer = inputdlg(omitPrompt, omitDlgtitle, [1 50], omitDefinput);
+     
+     % Convert the input string to an array of numbers
+     omitSOC = str2num(omitAnswer{1});
+ else
+     omitSOC = [];
+ end
 
 legendEntries = {};
-
-markedPoints = cell(length(markFrequencies), 1);
-
 
 % Extract the number before "F" from the root folder path
 capTokens = regexp(rootFolder, '(\d+)F', 'tokens');
@@ -88,10 +86,12 @@ min_y_value = inf;
 max_x_value = -inf;
 min_x_value = inf;
 
+% Add these lines
+all_plotted_points = [];
+soc_datasets = {};
+
 % Initialize cell arrays to store frequency data and all data
 frequencyData = {};
-allData = {};
-oneHzPoints = [];
 
 % Loop through each SOC folder to read and plot data
 for k = 1:length(socFolders)
@@ -125,79 +125,94 @@ for k = 1:length(socFolders)
    
     % Extract the relevant columns (assuming columns 2 and 3 are real and imaginary parts)
     freq = data(:,1);
-    real_part = data(:, 2);
-    imaginary_part = data(:, 3);
-    
-    % Store data for custom data cursor function
-    allData{k} = data;
-    frequencyData{k} = freq;
+    real_part = data(:, 2) * 1e3;
+    imaginary_part = data(:, 3) * 1e3;
+
+    soc_datasets{end+1} = struct('freq', freq, 'real', real_part, 'imag', imaginary_part, 'soc', SOC);
+    frequencyData{k} = freq;  
 
     % Update min_y_value and max_x_value
     min_y_value = min(min_y_value, min(imaginary_part));
     max_x_value = max(max_x_value, max(real_part));
     min_x_value = min(min_x_value, min(real_part));
 
-    for j = 1:length(markFrequencies)
-    freqIndex = find(abs(freq - markFrequencies(j)) <= tolFreq(j), 1);
-      if ~isempty(freqIndex)
-        markedPoints{j} = [markedPoints{j}; real_part(freqIndex), imaginary_part(freqIndex)];
-        fprintf('Found point at %g Hz for SOC %d%%: (%.4f, %.4f)\n', markFrequencies(j), SOC, real_part(freqIndex), imaginary_part(freqIndex));
-     else
-        warning('Point not found at %g Hz for SOC %d%%', markFrequencies(j), SOC);
-     end
-    end
- 
-    % Plot the measured data
-    plot(real_part, imaginary_part, 'LineStyle', '--', 'LineWidth', 3, ...
-        'Marker', markers{k}, 'MarkerSize', 8, ...
-        'MarkerFaceColor', colors{k}, 'MarkerEdgeColor', colors{k}, 'Color', colors{k});
 
-    % Add legend entry for the current SOC value
-    legendEntries{end+1} = sprintf('%d%% SOC', SOC);
+ 
+    % --- in your plotting loop, replace your plot(...) call with this ---
+    h = plot(real_part, imaginary_part, ...
+    'LineStyle','--','LineWidth',3, ...
+    'Marker',markers{k},'MarkerSize',8, ...
+    'MarkerFaceColor',colors{k},'MarkerEdgeColor',colors{k}, ...
+    'Color',colors{k}, ...
+    'UserData',frequencyData{k});    % <-- store the freq vector
+    legendEntries{end+1} = sprintf('%d%%', SOC);
+
+
 end
 
 % Customize the figure
-xlabel('Real Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'LineWidth', tickLineWidth); 
-ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'LineWidth', tickLineWidth);
-title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
+% Customize the figure
+xlabel('Real Part [m$\Omega$]','Interpreter','latex');
+ylabel('-Imaginary Part [m$\Omega$]','Interpreter','latex');
 grid on;
-   
-% Set axis properties
-set(gca, 'YDir', 'reverse', 'FontSize', tickFontSize, 'LineWidth', tickLineWidth, 'GridColor', [0, 0, 0] , 'GridAlpha', 0.8);
-set(gca, 'XColor', [0, 0, 0], 'YColor', [0, 0, 0]); % Set tick color
-set(gcf, 'Color', 'w');
-ax = gca;
-ax.GridColor = [0, 0, 0];
-ax.GridAlpha = 0.9;
-ax.LineWidth = 5;
-ax.XAxis.LineWidth = tickLineWidth; % Thicker x-axis
-ax.YAxis.LineWidth = tickLineWidth; % Thicker y-axis
+set(gca, 'YDir', 'reverse') 
+
 
 
  %  ylim([min_y_value, 0])
  %  xlim([min_x_value, max_x_value]);
       
-    xlim([min_x_value, 0.0135]);
-    ylim([-0.01, 0]);
+    xlim([min_x_value, 0.0135*1e3]);
+    ylim([-0.01, 0]*1e3);
 
 % Add legend
 legend(legendEntries, 'Location', 'northwest', 'FontSize', fontSize);
 
+target_soc_for_annotation = 80;
+target_freq = 1;
+
+target_dataset_idx = -1;
+for i = 1:length(soc_datasets)
+    if soc_datasets{i}.soc == target_soc_for_annotation
+        target_dataset_idx = i;
+        break;
+    end
+end
+
+if target_dataset_idx > 0
+    target_dataset = soc_datasets{target_dataset_idx};
+    
+    [~, idx] = min(abs(target_dataset.freq - target_freq));
+    point_to_annotate = [target_dataset.real(idx), target_dataset.imag(idx)];
+    
+    [x_head, y_head] = data2norm(gca, point_to_annotate(1), point_to_annotate(2));
+
+    x_tail = x_head - 0.1;
+    y_tail = y_head + 0.1;
+    
+    label_text = sprintf('%.0f Hz', target_freq);
+
+      % --- Create the textbox and arrow separately ---
+    annotation('textbox', [x_tail, y_tail, 0, 0], ...
+        'String', label_text, ...
+        'FontSize', 14, ...
+        'VerticalAlignment', 'bottom', ...
+        'FitBoxToText', 'on');
+
+
+    annotation('textarrow', [x_tail, x_head], [y_tail, y_head], ...
+        'String', label_text, ...
+        'FontSize', 14);
+    
+end
+
+
+ax = gca;
+SET_NYQUIST_STYLE(ax);
+
 % Standardize the figure
 STANDARDIZE_FIGURE(fig1_comps);
 
-
-% Connect the points close to the specified frequencies and add labels
-for j = 1:length(markedPoints)
-    if ~isempty(markedPoints{j})
-        plot(markedPoints{j}(:, 1), markedPoints{j}(:, 2), 'k--o', 'LineWidth', 2);
-        text(markedPoints{j}(1, 1), markedPoints{j}(1, 2), sprintf('%g Hz', markFrequencies(j)), ...
-            'VerticalAlignment', 'cap', 'HorizontalAlignment', 'right', 'Color', 'k', 'FontSize', 18, 'FontWeight', 'bold');
-        fprintf('Connected points close to %g Hz and added a label.\n', markFrequencies(j));
-    else
-        warning('No points found for frequency %g Hz.', markFrequencies(j));
-    end
-end
 
 
 % Define the folder name
@@ -211,29 +226,68 @@ end
 
 % Construct the filename with capNumber
 outputFileName = sprintf('%s/SOC-%sF_Zoomed.pdf', FiguresFol, capNumber);
-     SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');
+exportgraphics(fig1_comps.fig,outputFileName, ...
+               'ContentType','vector', ...   % PDF/SVG – grid never blurs
+               'BackgroundColor','none');
 
 
-% Custom data cursor update function
-function txt = myupdatefcn(~, event_obj, frequencyData, allData)
-    pos = get(event_obj, 'Position');
-    index = get(event_obj, 'DataIndex');
-    
-    % Determine which dataset is being referenced
-    freq = NaN;
-    for k = 1:length(allData)
-        real_part = allData{k}(:, 2);
-        imaginary_part = allData{k}(:, 3);
-        if ismember(pos(1), real_part) && ismember(pos(2), imaginary_part)
-            freq = frequencyData{k}(index);
-            break;
-        end
-    end
-    
-    txt = {['X: ', num2str(pos(1))], ...
-           ['Y: ', num2str(pos(2))], ...
-           ['Frequency: ', num2str(freq)]};
+% --- change your datacursor setup and update function ---
+
+% turn on the data‐tip tool and grab its manager
+datacursormode on;                        % "flip the switch" so MATLAB lets you click points
+dcm_obj = datacursormode(gcf);            % "grab the steering wheel" (the DataCursor object)
+set(dcm_obj, 'UpdateFcn', @myupdatefcn);  % "plug in" your custom update function
+
+% and redefine myupdatefcn as below:
+function txt = myupdatefcn(~, event_obj)
+    pos    = get(event_obj, 'Position');     % [X,Y] of click
+    idx    = get(event_obj, 'DataIndex');    % index into that trace
+    freqV  = get(event_obj.Target, 'UserData'); % pull stored freq vector
+    txt = { ['X: ', num2str(pos(1))], ...
+            ['Y: ', num2str(pos(2))], ...
+            ['Frequency: ', num2str(freqV(idx))] };  % direct lookup
 end
+
+function [norm_x, norm_y] = data2norm(ax, data_x, data_y)
+    ax_pos = get(ax, 'Position');
+    x_lim = get(ax, 'XLim');
+    y_lim = get(ax, 'YLim');
+    norm_x_in_ax = (data_x - x_lim(1)) / (x_lim(2) - x_lim(1));
+    norm_y_in_ax = (data_y - y_lim(1)) / (y_lim(2) - y_lim(1));
+    norm_x = ax_pos(1) + (norm_x_in_ax * ax_pos(3));
+    norm_y = ax_pos(2) + (norm_y_in_ax * ax_pos(4));
+end
+
+function SET_NYQUIST_STYLE(ax)
+    % ----- global look -----
+    fnt  = 24;          % axis/legend font
+    tfnt = 18;          % tick-label font
+    lnW  = 1.25;        % axis & grid line width (pt)
+
+    % ----- axes & grid -----
+    set(ax,'FontName','Times New Roman', ...
+           'FontSize',tfnt, ...
+           'LineWidth',lnW, ...
+           'TickDir','out', ...
+           'Box','on', ...
+           'XGrid','on','YGrid','on', ...
+           'GridAlpha',0.8,'MinorGridAlpha',0.3, ...
+           'GridLineStyle','-');
+
+    % fixed 1:1 aspect so all plots line up visually
+    ax.PlotBoxAspectRatio = [1 1 1];
+
+    % ----- labels -----
+    ax.XLabel.FontSize = fnt;
+    ax.YLabel.FontSize = fnt;
+
+    % ----- legend (if it already exists) -----
+    lgd = findobj(ax.Parent,'Type','Legend');
+    if ~isempty(lgd)
+        set(lgd,'FontSize',fnt,'Box','on','ItemTokenSize',[18 6]);
+    end
+end
+
 
 % ===== helper: climb until we hit repo root (.git or "-main") ===========
 function root = findRepoRoot(startDir)
@@ -253,12 +307,5 @@ function root = findRepoRoot(startDir)
 end
 
 
-
-
-
-% Add data cursor mode
-datacursormode on;
-dcm_obj = datacursormode(gcf);
-set(dcm_obj, 'UpdateFcn', {@myupdatefcn, frequencyData, allData});
 
 

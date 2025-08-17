@@ -52,8 +52,8 @@ for k = 1:length(socFolders)
     tokens = regexp(socFolders(k).name, '(\d+)%SOC', 'tokens');
     if ~isempty(tokens)
         SOC = str2double(tokens{1}{1});
-        socPercentagesMeasured{end+1} = [num2str(SOC) '% SOC'];
-        socPercentagesFitted{end+1} = [num2str(SOC) '% SOC (Fit)'];
+        socPercentagesMeasured{end+1} = [num2str(SOC) '%'];
+        socPercentagesFitted{end+1} = [num2str(SOC) '% (Fit)'];
         inputFile = fullfile(socFolderPath, sprintf('60F-%d%%SOC_Python.csv', SOC));
         fitFile = fullfile(socFolderPath, sprintf('60F-%d%%SOC_Fit.csv', SOC));
     else
@@ -75,8 +75,8 @@ for k = 1:length(socFolders)
     data = readmatrix(inputFile);
     
     % Extract the relevant columns (assuming columns 2 and 3 are real and imaginary parts)
-    real_part = data(:, 2);
-    imaginary_part = data(:, 3);
+    real_part = data(:, 2)*1e3;
+    imaginary_part = data(:, 3)*1e3;
     
     % Update min_y_value and max_x_value
     min_y_value = min(min_y_value, min(imaginary_part));
@@ -92,8 +92,8 @@ for k = 1:length(socFolders)
     fitData = readmatrix(fitFile);
     
     % Extract the relevant columns (assuming columns 2 and 3 are real and imaginary parts)
-    fit_real_part = fitData(:, 2);
-    fit_imaginary_part = fitData(:, 3);
+    fit_real_part = fitData(:, 2)*1e3;
+    fit_imaginary_part = fitData(:, 3)*1e3;
     
     % Plot the fitted data
     h2 = plot(fit_real_part, fit_imaginary_part, 'LineStyle', '-', 'LineWidth', 2, ...
@@ -105,17 +105,16 @@ for k = 1:length(socFolders)
 end
 
 % Customize the figure
-xlabel('Real Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize); % Updated to milliohms
-ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize);
-title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
+xlabel('Real Part [m\Omega]','Interpreter','tex');          % was 'latex'
+ylabel('-Imaginary Part [m\Omega]','Interpreter','tex');    % was 'latex'
 grid on;
 
 
-isZoomed = true;
+isZoomed = false;
 
  if isZoomed
-      ylim([-0.010, 0]);
-      xlim([min_x_value, 0.015]);
+      ylim([-0.010*1e3, 0]);
+      xlim([min_x_value, 0.015*1e3]);
  else
       ylim([min_y_value, 0]);
       xlim([min_x_value, max_x_value]); 
@@ -139,29 +138,42 @@ ax.GridAlpha = 0.6;
 ax.LineWidth = 2;
 
 % Add the first legend
-leg1 = legend(h_measured, socPercentagesMeasured, 'Location', 'northwest', 'FontSize', fontSize);
+leg1 = legend(h_measured, socPercentagesMeasured, 'Location', 'northwest', 'FontSize', 10);
+% set(leg1.Position = [])
 
 % Create an invisible axes for the second legend
 ah1 = axes('position', get(gca, 'position'), 'visible', 'off');
 
 % Add the second legend
-leg2 = legend(ah1, h_fitted, socPercentagesFitted, 'Location', 'northwest', 'FontSize', fontSize);
+leg2 = legend(ah1, h_fitted, socPercentagesFitted, 'Location', 'northwest', 'FontSize', 10);
 
 
-set(leg2, 'Position', [0.0882 0.5707 0.4339 0.4869]);  % Adjust position as needed
+set(leg2, 'Position', leg1.Position);  % Adjust position as needed
+h_legend = findobj(fig, 'Type', 'Legend');
 
+    if ~isempty(h_legend)
+        set(h_legend, 'Units', 'normalized');
+        set(h_legend, 'Box', 'on', 'ItemTokenSize', [20, 6]); % Give marker more space
+    end
 
 % Standardize the figure
 STANDARDIZE_FIGURE(fig1_comps);
 
-% Define the folder name
-FiguresFol = 'Figures';
 
-if exist(FiguresFol, 'dir')
-   fprintf('Folder "%s" already exists.\n', FiguresFol);
-else
- mkdir(FiguresFol);
-end
+% --- Resize the Figure and Export ---
+FIG_WIDTH_INCHES = 3.5;
+fig = gcf;
+ax = gca;
+fig.PaperUnits = 'inches';
+current_aspect_ratio = ax.PlotBoxAspectRatio;
+fig_height_inches = FIG_WIDTH_INCHES * (current_aspect_ratio(2) / current_aspect_ratio(1));
+fig.PaperSize = [FIG_WIDTH_INCHES, fig_height_inches];
+fig.PaperPosition = [0, 0, FIG_WIDTH_INCHES, fig_height_inches];
+
+FiguresFol = 'Figures';
+if ~exist(FiguresFol, 'dir'), mkdir(FiguresFol); end
+
+
 
 % Define the output filename based on the zoom status
 if isZoomed
@@ -170,8 +182,9 @@ else
     outputFileName = sprintf('%s/SOC-Fit%sF.pdf', FiguresFol, capNumber);
 end
 
-% Save the figure
-SAVE_MY_FIGURE(fig1_comps, outputFileName, 'big');
+print(fig, outputFileName, '-dpdf', '-r0');
+
+fprintf('Successfully exported PUBLICATION-READY figure to: %s\n', outputFileName);
 
 % Display the tracked min and max values
 disp(['Minimum y (imaginary part) value: ', num2str(min_y_value)]);
