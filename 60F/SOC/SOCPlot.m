@@ -1,5 +1,37 @@
 clear; clc; close all;
 
+
+% =========  make the script location-independent  =======================
+scriptDir  = fileparts(mfilename('fullpath'));          % where this .m lives
+repoRoot   = findRepoRoot(scriptDir);                   % walk up until .git or *-main
+if isempty(repoRoot)
+    error('Could not locate the repository root starting from %s', scriptDir);
+end
+
+% locate all "<number>F" folders directly under the repo root
+Fdirs = dir(fullfile(repoRoot,'*F'));
+Fdirs = Fdirs([Fdirs.isdir]);                           % keep only dirs
+Fdirs = Fdirs(~startsWith({Fdirs.name},'.'));           % skip .git etc.
+
+if isempty(Fdirs)
+    error('No "<cap>F" folders found directly under %s', repoRoot);
+elseif isscalar(Fdirs)
+    capFolder = fullfile(repoRoot, Fdirs(1).name);
+else
+    % ask the user which capacitance folder to use
+    [idx,tf] = listdlg('PromptString','Select capacitance folder:', ...
+                       'SelectionMode','single', ...
+                       'ListString',{Fdirs.name});
+    if ~tf, error('No capacitance folder selected.'); end
+    capFolder = fullfile(repoRoot, Fdirs(idx).name);
+end
+
+cd(capFolder);              % ==> *now* we're inside 60F (or 400F, …)
+cd("SOC");
+rootFolder   = pwd;         % keep the variable name that the old code expects
+% ========================================================================
+
+
  % Prompt user to input SOC values to omit
  omitPrompt = {'Enter SOC values to omit (comma-separated, e.g., 0,40):'};
  omitDlgtitle = 'Omit SOC Values';
@@ -18,10 +50,6 @@ legendEntries = {};
 
 markedPoints = cell(length(markFrequencies), 1);
 
-
-
-% Define the root folder where all SOC subfolders are located
-rootFolder = pwd;
 
 % Extract the number before "F" from the root folder path
 capTokens = regexp(rootFolder, '(\d+)F', 'tokens');
@@ -133,14 +161,6 @@ xlabel('Real Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'Li
 ylabel('-Imaginary Part [$\Omega$]', 'Interpreter', 'latex', 'FontSize', fontSize, 'LineWidth', tickLineWidth);
 title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), 'FontSize', fontSize);
 grid on;
-
-
-% % % % % % % Xlim -- Ylim
-      % ylim([min_y_value, 0])
-      % xlim([min_x_value, max_x_value]);
-      
-      xlim([min_x_value, 0.0135]);
-     ylim([-0.01, 0]);
    
 % Set axis properties
 set(gca, 'YDir', 'reverse', 'FontSize', tickFontSize, 'LineWidth', tickLineWidth, 'GridColor', [0, 0, 0] , 'GridAlpha', 0.8);
@@ -152,6 +172,13 @@ ax.GridAlpha = 0.9;
 ax.LineWidth = 5;
 ax.XAxis.LineWidth = tickLineWidth; % Thicker x-axis
 ax.YAxis.LineWidth = tickLineWidth; % Thicker y-axis
+
+
+ %  ylim([min_y_value, 0])
+ %  xlim([min_x_value, max_x_value]);
+      
+    xlim([min_x_value, 0.0135]);
+    ylim([-0.01, 0]);
 
 % Add legend
 legend(legendEntries, 'Location', 'northwest', 'FontSize', fontSize);
@@ -207,6 +234,27 @@ function txt = myupdatefcn(~, event_obj, frequencyData, allData)
            ['Y: ', num2str(pos(2))], ...
            ['Frequency: ', num2str(freq)]};
 end
+
+% ===== helper: climb until we hit repo root (.git or "-main") ===========
+function root = findRepoRoot(startDir)
+    root = '';
+    d    = startDir;
+    while true
+        if exist(fullfile(d,'.git'),'dir') || endsWith(d,'-main')
+            root = d;
+            return
+        end
+        [parent, this] = fileparts(d);
+        if isempty(this) || strcmp(parent,d)   % reached drive root
+            break
+        end
+        d = parent;                            % go one level up
+    end
+end
+
+
+
+
 
 % Add data cursor mode
 datacursormode on;
