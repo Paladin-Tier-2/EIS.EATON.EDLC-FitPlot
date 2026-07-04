@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+
+.ipynb_checkpoints/
+.pytest_cache/
+
+*.asv
+*.m~
+
+Figures/
+animation/
+*.fig
+
+.DS_Store
+Thumbs.db
