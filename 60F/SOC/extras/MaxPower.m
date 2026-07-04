@@ -1,7 +1,6 @@
 clear; clc; close all;
 
-% Define the root folder where all SOC subfolders are located
-rootFolder = pwd;
+rootFolder = fileparts(fileparts(mfilename('fullpath')));
 
 % Extract the number before "F" from the root folder path
 capTokens = regexp(rootFolder, '(\d+)F', 'tokens');
@@ -78,8 +77,14 @@ end
 r0Values = r0Values(sortIdx);
 
 hold on
+
 % Calculate voltage and maximum working power for each SOC
+if strcmp(capNumber, '60')
+maxVoltage = 3;
+else
 maxVoltage = 2.7;
+end
+
 voltages = (socValues / 100) * maxVoltage;
 maxPower = (voltages.^2) ./ (4 * r0Values);
 maxPower2 = (voltages.^2) ./ (4 * (r0Values+0.2*10^-3));
@@ -99,4 +104,3 @@ set(gcf, 'Color', 'white');
 
 % Add textbox with max voltage information
 annotation('textbox', [0.15, 0.8, 0.3, 0.1], 'String', sprintf('Max Voltage: %.1f V', maxVoltage), 'FitBoxToText', 'on', 'BackgroundColor', 'white');
-

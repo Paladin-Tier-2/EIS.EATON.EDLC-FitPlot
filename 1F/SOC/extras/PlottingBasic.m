@@ -5,8 +5,9 @@ clear; clc; close all;
 PS = PLOT_STANDARDS();
 fig1_comps.fig = gcf;
 
-data = readmatrix('SingleTest-Vertification/fitted_dataBasic.csv');
-data4 = readmatrix('80%SOC/1F-80%SOC_Python.csv');
+rootFolder = fileparts(fileparts(mfilename('fullpath')));
+data = readmatrix(fullfile(rootFolder, 'SingleTest-Vertification', 'fitted_dataBasic.csv'));
+data4 = readmatrix(fullfile(rootFolder, '80%SOC', '1F-80%SOC_Python.csv'));
 
 
 fitData = data(:, [1,2,3]); % Extract frequency, real part, and imaginary part

@@ -13,8 +13,7 @@ else
     omitSOC = str2double(strsplit(omitAnswer{1}, ','));  % Split string by commas and convert to numeric array
 end
 
-% Define the root folder where all SOC subfolders are located
-rootFolder = pwd;
+rootFolder = fileparts(fileparts(mfilename('fullpath')));
 
 % Extract the number before "F" from the root folder path
 capTokens = regexp(rootFolder, '(\d+)F', 'tokens');
@@ -151,4 +150,3 @@ leg1 = legend(h_error, socPercentagesError, 'Location', 'north', 'FontSize', fon
 
 % Standardize the figure
 STANDARDIZE_FIGURE(fig1_comps);
-
