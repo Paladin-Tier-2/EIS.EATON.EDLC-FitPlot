@@ -12,8 +12,10 @@ addpath(fullfile(repoRoot, 'plotting'));
 
 config = struct();
 config.defaultOmitText = '0,40';
+config.impedanceScale = 1000;
 config.axisMode = 'full';
 config.xLabel = 'Real Part [m$\Omega$]';
+config.yLabel = '-Imaginary Part [m$\Omega$]';
 config.outputMode = 'omitSuffix';
 
 plot_soc_fit(rootFolder, config);

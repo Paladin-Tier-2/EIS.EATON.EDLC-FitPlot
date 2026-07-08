@@ -19,8 +19,7 @@ function plot_soc_fit(rootFolder, config)
 
     markedPoints = cell(length(config.markFrequencies), 1);
     limits = initLimits();
-    socPercentagesMeasured = {};
-    socPercentagesFitted = {};
+    socLabels = {};
     h_measured = [];
     h_fitted = [];
 
@@ -48,23 +47,27 @@ function plot_soc_fit(rootFolder, config)
             continue;
         end
 
-        socPercentagesMeasured{end + 1} = [num2str(SOC) '% SOC']; %#ok<AGROW>
-        socPercentagesFitted{end + 1} = [num2str(SOC) '% SOC (Fit)']; %#ok<AGROW>
+        socLabels{end + 1} = [num2str(SOC) '%']; %#ok<AGROW>
 
         [freq, real_part, imaginary_part] = readMeasuredData(inputFile);
+        real_part = real_part * config.impedanceScale;
+        imaginary_part = imaginary_part * config.impedanceScale;
         limits = updateLimits(limits, real_part, imaginary_part);
 
         markedPoints = collectMarkedPoints(markedPoints, config, freq, ...
             real_part, imaginary_part, SOC);
 
         [color, marker] = getPlotStyle(PS, SOC, k);
-        h1 = plot(real_part, imaginary_part, 'LineStyle', '--', 'LineWidth', 3, ...
-            'Marker', marker, 'MarkerSize', 8, ...
+        h1 = plot(real_part, imaginary_part, 'LineStyle', '--', ...
+            'LineWidth', config.measuredLineWidth, 'Marker', marker, ...
+            'MarkerSize', config.markerSize, ...
             'MarkerFaceColor', color, 'MarkerEdgeColor', color, 'Color', color);
 
         [fit_real_part, fit_imaginary_part] = readFitData(fitFile);
+        fit_real_part = fit_real_part * config.impedanceScale;
+        fit_imaginary_part = fit_imaginary_part * config.impedanceScale;
         h2 = plot(fit_real_part, fit_imaginary_part, 'LineStyle', '-', ...
-            'LineWidth', 2, 'Marker', 'none', 'Color', color);
+            'LineWidth', config.fitLineWidth, 'Marker', 'none', 'Color', color);
 
         h_measured = [h_measured, h1]; %#ok<AGROW>
         h_fitted = [h_fitted, h2]; %#ok<AGROW>
@@ -72,19 +75,16 @@ function plot_soc_fit(rootFolder, config)
 
     xlabel(config.xLabel, 'Interpreter', 'latex', 'FontSize', config.fontSize);
     ylabel(config.yLabel, 'Interpreter', 'latex', 'FontSize', config.fontSize);
-    title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), ...
-        'FontSize', config.fontSize);
+    if config.showTitle
+        title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), ...
+            'FontSize', config.fontSize, 'Color', 'k');
+    end
     grid on;
 
     applyFitAxes(config, limits);
     styleFitAxes(config);
 
-    legend(h_measured, socPercentagesMeasured, 'Location', 'northwest', ...
-        'FontSize', config.fontSize);
-    ah1 = axes('position', get(gca, 'position'), 'visible', 'off');
-    leg2 = legend(ah1, h_fitted, socPercentagesFitted, 'Location', 'northwest', ...
-        'FontSize', config.fontSize);
-    set(leg2, 'Position', [0.0882 0.5707 0.4339 0.4869]);
+    addFitLegend(h_measured, h_fitted, socLabels, config);
 
     STANDARDIZE_FIGURE(fig1_comps);
 
@@ -102,7 +102,14 @@ function config = withFitDefaults(config)
     config = setDefault(config, 'defaultOmitText', '0,40');
     config = setDefault(config, 'markFrequencies', []);
     config = setDefault(config, 'tolFreq', zeros(size(config.markFrequencies)));
-    config = setDefault(config, 'fontSize', 20);
+    config = setDefault(config, 'fontSize', 12);
+    config = setDefault(config, 'legendFontSize', 9);
+    config = setDefault(config, 'measuredLineWidth', 1.2);
+    config = setDefault(config, 'fitLineWidth', 1.4);
+    config = setDefault(config, 'markerSize', 4);
+    config = setDefault(config, 'showTitle', false);
+    config = setDefault(config, 'impedanceScale', 1);
+    config = setDefault(config, 'zoomXMax', 0.015);
     config = setDefault(config, 'axisMode', 'full');
     config = setDefault(config, 'xLabel', 'Real Part [$\Omega$]');
     config = setDefault(config, 'yLabel', '-Imaginary Part [$\Omega$]');
@@ -269,8 +276,8 @@ function applyFitAxes(config, limits)
             xlim([0.05, 0.21]);
             ylim([-0.1431, -0.0005]);
         case 'zoom60'
-            ylim([-0.010, 0]);
-            xlim([limits.minX, 0.015]);
+            ylim([-10, 0] * config.impedanceScale / 1000);
+            xlim([limits.minX, config.zoomXMax]);
         case 'full'
             xlim([limits.minX, limits.maxX]);
             ylim([limits.minY, 0]);
@@ -284,14 +291,26 @@ function styleFitAxes(config)
 %
 % Reverse y-axis so the plot displays -Im(Z) in the usual Nyquist orientation.
     set(gca, 'YDir', 'reverse', 'FontSize', config.fontSize, ...
-        'LineWidth', 1.5, 'GridColor', 'k', 'GridAlpha', 0.6);
+        'LineWidth', 0.8, 'GridColor', [0.4, 0.4, 0.4], 'GridAlpha', 0.35);
     set(gca, 'XColor', 'k', 'YColor', 'k');
     set(gcf, 'Color', 'w');
 
     ax = gca;
-    ax.GridColor = [0, 0, 0];
-    ax.GridAlpha = 0.6;
-    ax.LineWidth = 2;
+    ax.GridColor = [0.4, 0.4, 0.4];
+    ax.GridAlpha = 0.35;
+    ax.LineWidth = 0.8;
+end
+
+function addFitLegend(h_measured, h_fitted, socLabels, config)
+%ADDFITLEGEND Use one legend instead of two overlapping legend axes.
+    measuredHeader = plot(nan, nan, 'LineStyle', 'none', 'Marker', 'none');
+    fitHeader = plot(nan, nan, 'LineStyle', 'none', 'Marker', 'none');
+
+    handles = [measuredHeader, h_measured, fitHeader, h_fitted];
+    labels = [{'Measured'}, socLabels, {'Fit'}, socLabels];
+
+    legend(handles, labels, 'Location', 'northwest', ...
+        'FontSize', config.legendFontSize, 'AutoUpdate', 'off');
 end
 
 function outputName = getFitOutputName(config, capNumber, omitSOC)

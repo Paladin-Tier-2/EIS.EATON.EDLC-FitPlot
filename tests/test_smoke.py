@@ -1,4 +1,4 @@
-"""Fast smoke tests for the EIS fitting and plotting repo."""
+"""Tests for the EIS fitting and plotting repo."""
 
 import importlib.util
 import sys

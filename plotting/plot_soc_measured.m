@@ -50,6 +50,8 @@ function plot_soc_measured(rootFolder, config)
         end
 
         [freq, real_part, imaginary_part, data] = readMeasuredData(inputFile);
+        real_part = real_part * config.impedanceScale;
+        imaginary_part = imaginary_part * config.impedanceScale;
         allData{end + 1} = data; %#ok<AGROW>
         frequencyData{end + 1} = freq; %#ok<AGROW>
         limits = updateLimits(limits, real_part, imaginary_part);
@@ -58,8 +60,8 @@ function plot_soc_measured(rootFolder, config)
             real_part, imaginary_part, SOC);
 
         [color, marker] = getPlotStyle(PS, SOC, k);
-        plot(real_part, imaginary_part, 'LineStyle', '--', 'LineWidth', 3, ...
-            'Marker', marker, 'MarkerSize', 8, ...
+        plot(real_part, imaginary_part, 'LineStyle', '--', 'LineWidth', config.curveLineWidth, ...
+            'Marker', marker, 'MarkerSize', config.markerSize, ...
             'MarkerFaceColor', color, 'MarkerEdgeColor', color, 'Color', color);
 
         legendEntries{end + 1} = sprintf('%d%% SOC', SOC); %#ok<AGROW>
@@ -69,14 +71,16 @@ function plot_soc_measured(rootFolder, config)
         'LineWidth', config.tickLineWidth);
     ylabel(config.yLabel, 'Interpreter', 'latex', 'FontSize', config.fontSize, ...
         'LineWidth', config.tickLineWidth);
-    title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), ...
-        'FontSize', config.fontSize);
+    if config.showTitle
+        title(sprintf('Nyquist Plot for Different SOC Levels (%sF)', capNumber), ...
+            'FontSize', config.fontSize, 'Color', 'k');
+    end
     grid on;
 
     applyMeasuredAxes(config, limits);
     styleMeasuredAxes(config);
 
-    legend(legendEntries, 'Location', 'northwest', 'FontSize', config.fontSize, ...
+    legend(legendEntries, 'Location', 'northwest', 'FontSize', config.legendFontSize, ...
         'AutoUpdate', 'off');
     STANDARDIZE_FIGURE(fig1_comps);
 
@@ -101,9 +105,17 @@ function config = withMeasuredDefaults(config)
     config = setDefault(config, 'markFrequencies', []);
     config = setDefault(config, 'tolFreq', zeros(size(config.markFrequencies)));
     config = setDefault(config, 'frequencySelection', 'first');
-    config = setDefault(config, 'fontSize', 30);
-    config = setDefault(config, 'tickFontSize', 15);
-    config = setDefault(config, 'tickLineWidth', 10);
+    config = setDefault(config, 'fontSize', 12);
+    config = setDefault(config, 'tickFontSize', 10);
+    config = setDefault(config, 'legendFontSize', 10);
+    config = setDefault(config, 'tickLineWidth', 0.8);
+    config = setDefault(config, 'curveLineWidth', 1.4);
+    config = setDefault(config, 'markerSize', 5);
+    config = setDefault(config, 'frequencyLineWidth', 0.9);
+    config = setDefault(config, 'frequencyFontSize', 8);
+    config = setDefault(config, 'showTitle', false);
+    config = setDefault(config, 'impedanceScale', 1);
+    config = setDefault(config, 'zoomXMax', 0.0135);
     config = setDefault(config, 'axisMode', 'full');
     config = setDefault(config, 'xLabel', 'Real Part [$\Omega$]');
     config = setDefault(config, 'yLabel', '-Imaginary Part [$\Omega$]');
@@ -273,8 +285,8 @@ function applyMeasuredAxes(config, limits)
             ylim([limits.minY, 0]);
             xlim([limits.minX, limits.maxX]);
         case 'zoom60'
-            xlim([limits.minX, 0.0135]);
-            ylim([-0.01, 0]);
+            xlim([limits.minX, config.zoomXMax]);
+            ylim([-10, 0] * config.impedanceScale / 1000);
         case 'yfull'
             ylim([limits.minY, 0]);
         otherwise
@@ -287,15 +299,15 @@ function styleMeasuredAxes(config)
 %
 % Reverse y-axis so the plot displays -Im(Z) in the usual Nyquist orientation.
     set(gca, 'YDir', 'reverse', 'FontSize', config.tickFontSize, ...
-        'LineWidth', config.tickLineWidth, 'GridColor', [0, 0, 0], ...
-        'GridAlpha', 0.8);
+        'LineWidth', config.tickLineWidth, 'GridColor', [0.4, 0.4, 0.4], ...
+        'GridAlpha', 0.35);
     set(gca, 'XColor', [0, 0, 0], 'YColor', [0, 0, 0]);
     set(gcf, 'Color', 'w');
 
     ax = gca;
-    ax.GridColor = [0, 0, 0];
-    ax.GridAlpha = 0.9;
-    ax.LineWidth = 5;
+    ax.GridColor = [0.4, 0.4, 0.4];
+    ax.GridAlpha = 0.35;
+    ax.LineWidth = config.tickLineWidth;
     ax.XAxis.LineWidth = config.tickLineWidth;
     ax.YAxis.LineWidth = config.tickLineWidth;
 end
@@ -304,10 +316,11 @@ function plotFrequencyLabels(markedPoints, markFrequencies)
 %PLOTFREQUENCYLABELS Connect equal-frequency points across SOC curves.
     for j = 1:length(markedPoints)
         if ~isempty(markedPoints{j})
-            plot(markedPoints{j}(:, 1), markedPoints{j}(:, 2), 'k--o', 'LineWidth', 2);
+            plot(markedPoints{j}(:, 1), markedPoints{j}(:, 2), 'k--o', 'LineWidth', 0.9, ...
+                'MarkerSize', 3);
             text(markedPoints{j}(1, 1), markedPoints{j}(1, 2), sprintf('%g Hz', markFrequencies(j)), ...
                 'VerticalAlignment', 'cap', 'HorizontalAlignment', 'right', ...
-                'Color', 'k', 'FontSize', 18, 'FontWeight', 'bold');
+                'Color', 'k', 'FontSize', 8, 'FontWeight', 'bold');
             fprintf('Connected points close to %g Hz and added a label.\n', markFrequencies(j));
         else
             warning('No points found for frequency %g Hz.', markFrequencies(j));

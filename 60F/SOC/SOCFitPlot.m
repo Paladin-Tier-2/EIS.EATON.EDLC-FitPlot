@@ -12,7 +12,11 @@ addpath(fullfile(repoRoot, 'plotting'));
 
 config = struct();
 config.promptForOmit = false;
+config.impedanceScale = 1000;
 config.axisMode = 'zoom60';
+config.zoomXMax = 15;
+config.xLabel = 'Real Part [m$\Omega$]';
+config.yLabel = '-Imaginary Part [m$\Omega$]';
 config.outputMode = 'zoom60';
 
 plot_soc_fit(rootFolder, config);

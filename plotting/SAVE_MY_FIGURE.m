@@ -22,6 +22,12 @@ if ~isempty(outputFolder) && ~exist(outputFolder, 'dir')
 end
 
 if nargin >= 3 && strcmpi(string(sizeName), "big")
+    set(fig, 'Units', 'inches');
+    fig.Position(3:4) = [5.2, 3.8];
+    set(fig, 'PaperUnits', 'inches');
+    set(fig, 'PaperPosition', [0, 0, 5.2, 3.8]);
+    set(fig, 'PaperSize', [5.2, 3.8]);
+else
     set(fig, 'PaperPositionMode', 'auto');
 end
 
