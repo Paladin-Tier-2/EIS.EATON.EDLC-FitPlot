@@ -1,11 +1,14 @@
 __pycache__/
 *.py[cod]
+.venv/
 
 .ipynb_checkpoints/
 .pytest_cache/
 
 *.asv
 *.m~
+tables.tex
+fit_params_combined_table.tex
 
 Figures/
 animation/

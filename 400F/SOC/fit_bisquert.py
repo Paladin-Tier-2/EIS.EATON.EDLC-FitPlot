@@ -6,7 +6,7 @@ from pathlib import Path
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root))
 
-from eis_fit_workflow import FitConfig, run_soc_folder
+from eis_fit import FitConfig, run_soc_folder
 
 
 config = FitConfig(

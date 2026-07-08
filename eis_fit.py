@@ -1,4 +1,4 @@
-"""Shared EIS fitting workflow used by the SOC fitting scripts."""
+"""Shared EIS fitting code used by the SOC fitting scripts."""
 
 import glob
 import os
@@ -10,10 +10,13 @@ import pandas as pd
 from impedance import preprocessing
 from impedance.models.circuits import CustomCircuit
 from impedance.models.circuits.elements import element
+from impedance.models.circuits.elements import circuit_elements
 from impedance.models.circuits.fitting import circuit_fit, rmse
 from impedance.preprocessing import saveCSV
 from impedance.validation import linKK
 from impedance.visualization import plot_nyquist, plot_residuals
+
+circuit_elements.setdefault('np', np)
 
 
 @dataclass(frozen=True)
@@ -393,8 +396,14 @@ def run_soc_folder(root_folder, config):
     config : FitConfig
         Model and output settings.
     """
+    failures = []
+
     for subfolder, csv_file in iter_python_csvs(root_folder):
         try:
             process_file(subfolder, csv_file, config)
         except Exception as e:
             print(f"An error occurred during the fitting process for {csv_file}:", e)
+            failures.append((csv_file, e))
+
+    if failures:
+        raise RuntimeError(f"{len(failures)} fit(s) failed. See messages above.")
