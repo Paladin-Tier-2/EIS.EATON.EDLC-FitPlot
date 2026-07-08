@@ -7,8 +7,8 @@ The workflow is split between MATLAB and Python:
 
 - MATLAB extracts the useful columns from exported measurement CSV files.
 - Python fits equivalent-circuit models with the `impedance` package.
-- MATLAB makes the Nyquist plots, fit plots, error plots, power plots, and some
-  LaTeX tables.
+- MATLAB makes the Nyquist plots, fit plots, error plots, and power plots.
+- Python collects some fit results into LaTeX tables.
 
 The repo includes measured data and generated fit outputs for `1F`, `60F`, and
 `400F` capacitors at different states of charge.
@@ -18,8 +18,9 @@ The repo includes measured data and generated fit outputs for `1F`, `60F`, and
 ```text
 .
 |-- ExtractNyquistAllSoc.m
-|-- eis_fit_workflow.py
-|-- eis_table_workflow.py
+|-- eis_fit.py
+|-- eis_tables.py
+|-- matlab_helpers/
 |-- 1F/
 |   `-- SOC/
 |-- 60F/
@@ -63,6 +64,8 @@ and `400F-40%SOC_Python.csv`.
 Python:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -76,9 +79,13 @@ Main Python packages:
 MATLAB:
 
 - MATLAB with `readtable`, `readmatrix`, and standard plotting functions.
-- The plotting scripts also call `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and
-  `SAVE_MY_FIGURE`. Those are not included in this repo. They come from the
-  Professional Plots setup used for the original plots.
+- The original plotting scripts used helper functions from a MATLAB
+  Professional Plots setup: `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and
+  `SAVE_MY_FIGURE`.
+- This repo includes small local replacements for those helpers in
+  `matlab_helpers/`, so the plots can run from a fresh clone. The local helpers
+  keep the output plain and publication-style instead of depending on the
+  external package theme.
 
 ## Data Extraction
 
@@ -128,24 +135,24 @@ Example:
 
 ```bash
 cd 1F/SOC
-python FitAll_Bisquert.py
+python fit_bisquert.py
 ```
 
 Other fitting scripts:
 
 ```text
-1F/SOC/FitAll_Bisquert.py
-1F/SOC/FitAll_Distinct.py
-1F/SOC/FitAllCutoff.py
-60F/SOC/FitAll.py
-400F/SOC/FitAll_Bisquert.py
-400F/SOC/FitAll_Distinct.py
+1F/SOC/fit_bisquert.py
+1F/SOC/fit_distinct.py
+1F/SOC/fit_bisquert_cutoff.py
+60F/SOC/fit_bisquert.py
+400F/SOC/fit_bisquert.py
+400F/SOC/fit_distinct.py
 ```
 
-These files are small wrappers around `eis_fit_workflow.py`. The wrappers keep
-the model-specific settings near the data: circuit string, initial guesses,
-bounds, parameter names, optional cutoff frequency, and whether to show a
-diagnostic plot.
+These files are small wrappers around `eis_fit.py`. The wrappers keep the
+model-specific settings near the data: circuit string, initial guesses, bounds,
+parameter names, optional cutoff frequency, and whether to show a diagnostic
+plot.
 
 The shared workflow searches the SOC subfolders for `*_Python.csv`, fits the
 configured circuit, and writes fit outputs next to the input files.
@@ -170,13 +177,12 @@ results matter, copy them somewhere else first.
 
 ## MATLAB Plotting
 
-Run the plotting scripts from inside the matching `SOC` folder.
+Run the plotting scripts from MATLAB.
 
 Example:
 
 ```matlab
-cd 400F/SOC
-SOCFitPlot
+run('400F/SOC/SOCFitPlot.m')
 ```
 
 Useful MATLAB scripts:
@@ -186,16 +192,59 @@ Useful MATLAB scripts:
 | `SOCPlot.m` | Plot measured Nyquist data across SOC values |
 | `SOCFitPlot.m` | Plot measured data with fitted curves |
 
-Most plotting scripts expect to start in a `SOC` folder. They look for SOC
-subfolders below the current directory and write figures to a local `Figures`
-folder.
+Each capacitor has small `SOCPlot.m` and `SOCFitPlot.m` entry scripts. They set
+the few things that differ between capacitors:
+
+- omitted SOC defaults
+- marked frequencies and tolerances
+- axis limits
+- output file names
+- optional animation export for `400F`
+
+The shared plotting code lives in:
+
+```text
+matlab_helpers/plot_soc_measured.m
+matlab_helpers/plot_soc_fit.m
+```
+
+Those helpers use the folder containing the entry script, not MATLAB's current
+working directory. They look for SOC subfolders below that `SOC` folder and
+write figures to a local `Figures` folder.
 
 Some scripts ask which SOC values to omit from a plot.
+
+For batch runs without prompts:
+
+```bash
+EIS_SKIP_PROMPTS=1 EIS_OMIT_SOC=none matlab -batch "run('400F/SOC/SOCFitPlot.m')"
+```
 
 Older plot variants and one-off analysis scripts are in `extras/` folders under
 each `SOC` folder. This keeps the main folder readable without deleting useful
 old plotting work. Examples include frequency-label plots, legend-layout
 variants, `MaxPower.m`, `RelativeError.m`, and `PlottingBasic.m`.
+
+## Using Another Capacitor
+
+The scripts are still written around this repo's file naming pattern, but the
+main MATLAB and Python code is no longer copied per capacitor.
+
+For another capacitor, create the same folder layout:
+
+```text
+<capacitance>F/SOC/<SOC>%SOC/
+```
+
+Then add small wrapper scripts in `<capacitance>F/SOC/`:
+
+- Python: copy the closest `fit_*.py` wrapper and adjust the circuit, guesses,
+  bounds, and parameter names.
+- MATLAB: copy `SOCPlot.m` and `SOCFitPlot.m` from the closest capacitor and
+  adjust the config block.
+
+The shared Python code is in `eis_fit.py` and `eis_tables.py`. The shared MATLAB
+plotting code is in `matlab_helpers/`.
 
 ## Tables
 
@@ -205,56 +254,57 @@ Examples:
 
 ```bash
 cd 60F/SOC
-python table.py
-python ParamTable.py
+python write_fit_tables.py
+python write_params_bisquert.py
 ```
 
 Related scripts:
 
 ```text
-1F/SOC/table.py
-1F/SOC/ParamTable_Bisquert.py
-1F/SOC/ParamTable_Distinct.py
-60F/SOC/table.py
-60F/SOC/ParamTable.py
-400F/SOC/table.py
-400F/SOC/ParamTable.py
-400F/SOC/ParamTableDistinct.py
+1F/SOC/write_fit_tables.py
+1F/SOC/write_params_bisquert.py
+1F/SOC/write_params_distinct.py
+60F/SOC/write_fit_tables.py
+60F/SOC/write_params_bisquert.py
+400F/SOC/write_fit_tables.py
+400F/SOC/write_params_bisquert.py
+400F/SOC/write_params_distinct.py
 ```
 
 These scripts write `.tex` files into the same `SOC` folder.
 
-The table scripts are wrappers around `eis_table_workflow.py`.
+The table scripts are wrappers around `eis_tables.py`.
 
 ## Notes And Limitations
 
 - This is a research/thesis workflow repo, not a packaged Python library.
 - The data layout is part of the workflow. Renaming folders will break scripts
   unless the paths are updated.
-- MATLAB plotting depends on local plotting helper functions that are not stored
-  here.
+- The MATLAB plot helpers in `matlab_helpers/` are compatibility replacements
+  for the Professional Plots helpers used while making the original figures.
 - The Python fitting scripts contain model choices, bounds, and initial guesses
   directly in each file.
 - The generated CSV results are committed so the repo can be inspected without
   rerunning all fits.
-- Some plotting scripts have manual legend and axis settings. Adjust those in
-  the script when making a new figure.
+- Some plots have manual legend and axis settings. Adjust those in the small
+  `SOCPlot.m` or `SOCFitPlot.m` config block when making a new figure.
 
 ## Quick Start
 
 For an existing dataset already in this repo:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 cd 400F/SOC
-python FitAll_Bisquert.py
+python fit_bisquert.py
 ```
 
 Then in MATLAB:
 
 ```matlab
-cd 400F/SOC
-SOCFitPlot
+run('400F/SOC/SOCFitPlot.m')
 ```
 
 For new exported measurement CSV files:
@@ -262,4 +312,4 @@ For new exported measurement CSV files:
 1. Put each measurement in the matching `<capacitance>F/SOC/<SOC>%SOC/` folder.
 2. Run `ExtractNyquistAllSoc.m` from MATLAB and enter `1F`, `60F`, or `400F`.
 3. Run the matching Python fitting script from the `SOC` folder.
-4. Run the MATLAB plotting or table script from the same `SOC` folder.
+4. Run the MATLAB plotting script for that capacitor.
