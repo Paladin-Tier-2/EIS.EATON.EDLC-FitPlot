@@ -17,10 +17,10 @@ The repo includes measured data and generated fit outputs for `1F`, `60F`, and
 
 ```text
 .
-|-- ExtractNyquistAllSoc.m
+|-- extract_nyquist_all_soc.m
 |-- eis_fit.py
 |-- eis_tables.py
-|-- matlab_helpers/
+|-- plotting/
 |-- 1F/
 |   `-- SOC/
 |-- 60F/
@@ -83,19 +83,19 @@ MATLAB:
   Professional Plots setup: `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and
   `SAVE_MY_FIGURE`.
 - This repo includes small local replacements for those helpers in
-  `matlab_helpers/`, so the plots can run from a fresh clone. The local helpers
+  `plotting/`, so the plots can run from a fresh clone. The local helpers
   keep the output plain and publication-style instead of depending on the
   external package theme.
 
 ## Data Extraction
 
-Use `ExtractNyquistAllSoc.m` to create the `_Python.csv` files from the exported
+Use `extract_nyquist_all_soc.m` to create the `_Python.csv` files from the exported
 measurement CSV files.
 
 Run it from MATLAB:
 
 ```matlab
-ExtractNyquistAllSoc
+extract_nyquist_all_soc
 ```
 
 When prompted, enter the capacitor folder name:
@@ -104,6 +104,12 @@ When prompted, enter the capacitor folder name:
 1F
 60F
 400F
+```
+
+Or pass the folder name directly:
+
+```matlab
+extract_nyquist_all_soc('400F')
 ```
 
 The script looks for:
@@ -204,8 +210,8 @@ the few things that differ between capacitors:
 The shared plotting code lives in:
 
 ```text
-matlab_helpers/plot_soc_measured.m
-matlab_helpers/plot_soc_fit.m
+plotting/plot_soc_measured.m
+plotting/plot_soc_fit.m
 ```
 
 Those helpers use the folder containing the entry script, not MATLAB's current
@@ -244,7 +250,7 @@ Then add small wrapper scripts in `<capacitance>F/SOC/`:
   adjust the config block.
 
 The shared Python code is in `eis_fit.py` and `eis_tables.py`. The shared MATLAB
-plotting code is in `matlab_helpers/`.
+plotting code is in `plotting/`.
 
 ## Tables
 
@@ -275,12 +281,36 @@ These scripts write `.tex` files into the same `SOC` folder.
 
 The table scripts are wrappers around `eis_tables.py`.
 
+## Tests
+
+This repo has a small CI smoke test for the Python side:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+The test checks that the Python wrappers import, sample impedance data can be
+read, the shared fitting setup is wired, and the MATLAB entry scripts point to
+the shared plotting code.
+
+There is also a local MATLAB smoke test:
+
+```bash
+matlab -batch "addpath('tests'); run_matlab_smoke"
+```
+
+That runs MATLAB Code Analyzer on the main `.m` files and then runs the six main
+plotting scripts. It writes PDFs to ignored `Figures` folders.
+
+GitHub Actions runs the Python smoke test on push and pull request. The MATLAB
+smoke test is local because it needs a MATLAB install.
+
 ## Notes And Limitations
 
 - This is a research/thesis workflow repo, not a packaged Python library.
 - The data layout is part of the workflow. Renaming folders will break scripts
   unless the paths are updated.
-- The MATLAB plot helpers in `matlab_helpers/` are compatibility replacements
+- The MATLAB plot helpers in `plotting/` are compatibility replacements
   for the Professional Plots helpers used while making the original figures.
 - The Python fitting scripts contain model choices, bounds, and initial guesses
   directly in each file.
@@ -310,6 +340,6 @@ run('400F/SOC/SOCFitPlot.m')
 For new exported measurement CSV files:
 
 1. Put each measurement in the matching `<capacitance>F/SOC/<SOC>%SOC/` folder.
-2. Run `ExtractNyquistAllSoc.m` from MATLAB and enter `1F`, `60F`, or `400F`.
+2. Run `extract_nyquist_all_soc.m` from MATLAB and enter `1F`, `60F`, or `400F`.
 3. Run the matching Python fitting script from the `SOC` folder.
 4. Run the MATLAB plotting script for that capacitor.

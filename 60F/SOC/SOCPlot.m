@@ -2,7 +2,7 @@ clear; clc; close all;
 
 rootFolder = fileparts(mfilename('fullpath'));
 repoRoot = fileparts(fileparts(rootFolder));
-addpath(fullfile(repoRoot, 'matlab_helpers'));
+addpath(fullfile(repoRoot, 'plotting'));
 
 % Workflow
 % 1. Use this SOC folder, independent of where MATLAB was launched.
