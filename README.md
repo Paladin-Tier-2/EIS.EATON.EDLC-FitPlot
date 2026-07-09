@@ -22,36 +22,14 @@ open-circuit fit at different SOC levels.
 This work is connected to the IEEE ECCE paper:
 [EIS-Based State of Charge Characterization of Electric Double-Layer Capacitors](https://ieeexplore.ieee.org/abstract/document/11238903).
 
-## Requirements
-
-Python:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Main Python packages:
-
-- `impedance`
-- `numpy`
-- `pandas`
-- `matplotlib`
-
-MATLAB:
-
-- MATLAB with `readtable`, `readmatrix`, and standard plotting functions.
-- The original plotting scripts used a MATLAB Professional Plots setup:
-  `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and `SAVE_MY_FIGURE`.
-- This repo includes small local replacements in `plotting/`, so the plots can
-  run from a fresh clone without that external setup.
-
 ## Quick Start
 
 For data that is already in this repo:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 cd 400F/SOC
 python fit_bisquert.py
 ```
@@ -75,6 +53,23 @@ For new measurement exports:
 2. Run `extract_nyquist_all_soc.m` in MATLAB.
 3. Run the matching Python fit script from the `SOC` folder.
 4. Run `SOCPlot.m` or `SOCFitPlot.m` in MATLAB.
+
+## Requirements
+
+Python packages:
+
+- `impedance`
+- `numpy`
+- `pandas`
+- `matplotlib`
+
+MATLAB:
+
+- MATLAB with `readtable`, `readmatrix`, and standard plotting functions.
+- The original plotting scripts used a MATLAB Professional Plots setup:
+  `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and `SAVE_MY_FIGURE`.
+- This repo includes small local replacements in `plotting/`, so the plots can
+  run from a fresh clone without that external setup.
 
 ## Where Things Are
 
