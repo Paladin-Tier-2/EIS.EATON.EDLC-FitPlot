@@ -1,10 +1,15 @@
 function audit_matlab_variants()
-%AUDIT_MATLAB_VARIANTS Try the older MATLAB plot variants.
+%AUDIT_MATLAB_VARIANTS Run the plot variants and save their PDFs.
 %
-% This is a local check. Some variants are old publication/manual scripts, so
-% this runner reports failures instead of acting as a merge gate.
+% Figures are hidden during the run. Inspect the generated PDFs in each
+% Figures folder afterward.
 
     repoRoot = fileparts(fileparts(mfilename('fullpath')));
+    oldFigureVisible = get(groot, 'DefaultFigureVisible');
+    cleanupFigureVisible = onCleanup(@() set(groot, 'DefaultFigureVisible', oldFigureVisible)); %#ok<NASGU>
+    set(groot, 'DefaultFigureVisible', 'off');
+    setenv('EIS_SKIP_PROMPTS', '1');
+    unsetenv('EIS_OMIT_SOC');
 
     variants = {
         '1F/SOC', 'plot_variants/PlottingBasic.m'
@@ -46,7 +51,7 @@ function audit_matlab_variants()
 end
 
 function runOneVariant(repoRoot, socFolder, scriptPath)
-%RUNONEVARIANT Isolate old scripts that call clear at top level.
+%RUNONEVARIANT Run one variant from its SOC folder.
     addpath(fullfile(repoRoot, 'plotting'));
     cd(fullfile(repoRoot, socFolder));
     run(scriptPath);

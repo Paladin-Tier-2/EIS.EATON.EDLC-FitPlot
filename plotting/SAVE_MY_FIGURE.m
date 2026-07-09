@@ -1,5 +1,5 @@
 function SAVE_MY_FIGURE(figComponents, outputFileName, sizeName)
-%SAVE_MY_FIGURE Save a figure using the old helper's call shape.
+%SAVE_MY_FIGURE Save a figure as a PDF.
 %
 % Parameters
 % ----------
@@ -8,7 +8,7 @@ function SAVE_MY_FIGURE(figComponents, outputFileName, sizeName)
 % outputFileName : char or string
 %     PDF path to write.
 % sizeName : char or string
-%     Kept for compatibility with the original scripts.
+%     Use "big" for the figure size used by the old scripts.
 
 if isstruct(figComponents) && isfield(figComponents, 'fig') && isgraphics(figComponents.fig)
     fig = figComponents.fig;

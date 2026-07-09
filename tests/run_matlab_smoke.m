@@ -1,11 +1,14 @@
 function run_matlab_smoke()
-%RUN_MATLAB_SMOKE Check and run the main MATLAB plot scripts.
+%RUN_MATLAB_SMOKE Run the main MATLAB plot scripts.
 %
-% This is a local smoke test. It needs MATLAB and writes PDFs to each SOC
-% folder's ignored Figures directory.
+% Figures are hidden during the run. Inspect the generated PDFs in each
+% Figures folder afterward.
 
     repoRoot = fileparts(fileparts(mfilename('fullpath')));
     cd(repoRoot);
+    oldFigureVisible = get(groot, 'DefaultFigureVisible');
+    cleanupFigureVisible = onCleanup(@() set(groot, 'DefaultFigureVisible', oldFigureVisible)); %#ok<NASGU>
+    set(groot, 'DefaultFigureVisible', 'off');
 
     files = {
         '1F/SOC/SOCPlot.m'
@@ -17,6 +20,8 @@ function run_matlab_smoke()
         'extract_nyquist_all_soc.m'
         'plotting/plot_soc_measured.m'
         'plotting/plot_soc_fit.m'
+        'plotting/plot_max_power.m'
+        'plotting/plot_relative_error.m'
         'plotting/PLOT_STANDARDS.m'
         'plotting/STANDARDIZE_FIGURE.m'
         'plotting/SAVE_MY_FIGURE.m'
@@ -52,7 +57,7 @@ function run_matlab_smoke()
 end
 
 function runOneScript(scriptPath)
-%RUNONESCRIPT Isolate script-level clear statements from the smoke runner.
+%RUNONESCRIPT Run one plot script from the repo root.
     run(scriptPath);
     close all;
 end

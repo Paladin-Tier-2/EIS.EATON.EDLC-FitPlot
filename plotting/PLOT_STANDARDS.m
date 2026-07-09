@@ -4,7 +4,7 @@ function PS = PLOT_STANDARDS()
 % Returns
 % -------
 % PS : struct
-%     Small compatibility struct for the original plotting helper package.
+%     Color palette used by the SOC plots.
 %     Values are MATLAB RGB triples in the 0..1 range.
 
 PS.DRed4 = [0.89, 0.10, 0.11];

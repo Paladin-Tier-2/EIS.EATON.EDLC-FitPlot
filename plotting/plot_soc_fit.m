@@ -4,10 +4,14 @@ function plot_soc_fit(rootFolder, config)
 % Parameters
 % ----------
 % rootFolder : char
-%     Path to the SOC folder that contains the SOC subfolders.
+%     SOC folder for one capacitor, for example 400F/SOC.
 % config : struct
-%     Plot settings that change between capacitors: omitted SOC values,
-%     marked frequencies, axis limits, labels, and output naming.
+%     Plot choices for this capacitor: omitted SOC values, marked
+%     frequencies, axis limits, labels, and output name.
+%
+% Notes
+% -----
+% SOC folders are expected to be named like 80%SOC.
 
     config = withFitDefaults(config);
     omitSOC = getOmittedSoc(config);
@@ -97,7 +101,7 @@ function plot_soc_fit(rootFolder, config)
 end
 
 function config = withFitDefaults(config)
-%WITHFITDEFAULTS Fill options shared by the fitted SOC plots.
+%WITHFITDEFAULTS Set default choices for fitted SOC plots.
     config = setDefault(config, 'promptForOmit', true);
     config = setDefault(config, 'defaultOmitText', '0,40');
     config = setDefault(config, 'markFrequencies', []);

@@ -4,16 +4,14 @@ function plot_soc_measured(rootFolder, config)
 % Parameters
 % ----------
 % rootFolder : char
-%     Path to the SOC folder that contains the SOC subfolders.
+%     SOC folder for one capacitor, for example 400F/SOC.
 % config : struct
-%     Plot settings that change between capacitors: omitted SOC values,
-%     marked frequencies, axis limits, output name, and optional animation
-%     export.
+%     Plot choices for this capacitor: omitted SOC values, marked
+%     frequencies, axis limits, output name, and optional animation export.
 %
 % Notes
 % -----
-% Capacitance folders are expected directly under the repo root, e.g. 60F or
-% 400F. SOC folders are expected under <capacitance>F/SOC as "<number>%SOC".
+% SOC folders are expected to be named like 80%SOC.
 
     config = withMeasuredDefaults(config);
     omitSOC = getOmittedSoc(config);
@@ -99,7 +97,7 @@ function plot_soc_measured(rootFolder, config)
 end
 
 function config = withMeasuredDefaults(config)
-%WITHMEASUREDDEFAULTS Fill options shared by the measured SOC plots.
+%WITHMEASUREDDEFAULTS Set default choices for measured SOC plots.
     config = setDefault(config, 'promptForOmit', true);
     config = setDefault(config, 'defaultOmitText', '0,40');
     config = setDefault(config, 'markFrequencies', []);
