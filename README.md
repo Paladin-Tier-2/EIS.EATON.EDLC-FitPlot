@@ -231,10 +231,28 @@ For batch runs without prompts:
 EIS_SKIP_PROMPTS=1 EIS_OMIT_SOC=none matlab -batch "run('400F/SOC/SOCFitPlot.m')"
 ```
 
-Older plot variants and one-off analysis scripts are in `extras/` folders under
-each `SOC` folder. This keeps the main folder readable without deleting useful
-old plotting work. Examples include frequency-label plots, legend-layout
-variants, `MaxPower.m`, `RelativeError.m`, and `PlottingBasic.m`.
+Older plot variants and one-off analysis scripts are in `plot_variants/`
+folders under each `SOC` folder. This keeps the main folder readable without
+deleting useful old plotting work. Examples include frequency-label plots,
+legend-layout variants, `MaxPower.m`, `RelativeError.m`, and `PlottingBasic.m`.
+
+Some of those files are publication-style variants with manual annotation or
+legend work. They are kept because they produced useful plots, but the normal
+entry points are still:
+
+```text
+<capacitance>F/SOC/SOCPlot.m
+<capacitance>F/SOC/SOCFitPlot.m
+```
+
+To audit the old variants locally:
+
+```matlab
+run('tests/audit_matlab_variants.m')
+```
+
+The audit reports which variants still run in batch mode and which ones are
+manual or stale.
 
 ## Using Another Capacitor
 
