@@ -13,7 +13,6 @@ config = FitConfig(
     circuit='R_0-B_1',
     initial_guess=[7.43197184e-03, 112e-3, 1e32, 60, 9.62423346e-01, 1],
     parameter_names=['R_0', 'B_1_0', 'B_1_1', 'B_1_2', 'B_1_3', 'B_1_4'],
-    show_plot=True,
 )
 
 
