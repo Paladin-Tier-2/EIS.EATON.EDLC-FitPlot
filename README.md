@@ -33,7 +33,7 @@ Related paper:
 
 ## Quick Start
 
-For data that is already in this repo:
+For data that is already in this repo, this is the shortest path:
 
 ```bash
 python -m venv .venv
@@ -43,7 +43,7 @@ cd 400F/SOC
 python fit_bisquert.py
 ```
 
-Then make the MATLAB fit plot from the repo root:
+The MATLAB fit plot can then be made from the repo root:
 
 ```matlab
 run('400F/SOC/SOCFitPlot.m')
@@ -56,22 +56,21 @@ MATLAB script writes the plot PDF to:
 400F/SOC/Figures/
 ```
 
-For new measurement exports:
+For new measurement exports, the workflow is roughly:
 
 1. Put each CSV in the matching `<capacitance>F/SOC/<SOC>%SOC/` folder.
-2. Run `extract_nyquist_all_soc.m` in MATLAB.
-3. Run the matching Python fit script from the `SOC` folder.
-4. Run `SOCPlot.m` or `SOCFitPlot.m` in MATLAB.
+2. Extract the Nyquist columns with `extract_nyquist_all_soc.m` in MATLAB.
+3. Fit the extracted data with the matching Python script from the `SOC` folder.
+4. Make the MATLAB plot with `SOCPlot.m` or `SOCFitPlot.m`.
 
 ## Requirements
 
-Python packages are listed in `requirements.txt` and installed in the Quick
-Start command above.
+Python packages are listed in `requirements.txt`.
 
 MATLAB:
 
 - MATLAB with `readtable`, `readmatrix`, and standard plotting functions.
-- The original plotting scripts used the MATLAB Professional Plots add-on:
+- The plotting scripts used the MATLAB Professional Plots add-on:
   `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and `SAVE_MY_FIGURE`.
 - This repo includes small local replacements in `plotting/`, so the plots can
   run from a fresh clone without that external setup.
@@ -131,21 +130,21 @@ Inside each SOC folder, the important file types are:
 | `<cap>F-<SOC>%SOC_Fit_mu.csv` | Lin-KK `mu` value |
 | `<cap>F-<SOC>%SOC_Fit_kkResults.csv` | Lin-KK summary values |
 
-The folder name and file names matter. The scripts expect names like `40%SOC`
-and `400F-40%SOC_Python.csv`.
+The folder name and file names matter. The current scripts look for names like
+`40%SOC` and `400F-40%SOC_Python.csv`.
 
 ## Data Extraction
 
-Use `extract_nyquist_all_soc.m` to create the `_Python.csv` files from the exported
+`extract_nyquist_all_soc.m` creates the `_Python.csv` files from the exported
 measurement CSV files.
 
-Run it from MATLAB:
+In MATLAB:
 
 ```matlab
 extract_nyquist_all_soc
 ```
 
-When prompted, enter the capacitor folder name:
+The prompt accepts the capacitor folder name:
 
 ```text
 1F
@@ -153,7 +152,7 @@ When prompted, enter the capacitor folder name:
 400F
 ```
 
-Or pass the folder name directly:
+The folder name can also be passed directly:
 
 ```matlab
 extract_nyquist_all_soc('400F')
@@ -171,7 +170,9 @@ For each SOC folder, it reads the canonical measurement CSV and writes:
 <capacitance>F-<SOC>%SOC_Python.csv
 ```
 
-The extraction currently uses columns 6, 11, and 12 from the exported CSV:
+The extraction currently uses columns 6, 11, and 12 from the exported CSV.
+For my exports, those were the right columns. Other EIS export settings may use
+a different column order.
 
 - frequency
 - real impedance
@@ -181,7 +182,7 @@ The old export notes and screenshots are in `docs/export_notes/`.
 
 ## Fitting In Python
 
-Run the fitting scripts from inside the matching `SOC` folder.
+The fitting scripts are meant to be run from inside the matching `SOC` folder.
 
 Example:
 
@@ -223,12 +224,12 @@ R_1-Wo_1-p(CPE_1,R_2-CPE_2)
 For the Bisquert open-circuit model, the ESR-related circuit element is named
 `R_0`.
 
-Important: running a fitting script writes new `_Fit*.csv` files. If existing
-results matter, copy them somewhere else first.
+Note: running a fitting script writes new `_Fit*.csv` files. If old fit outputs
+matter, keep a backup before rerunning the fit.
 
 ## Plotting In MATLAB
 
-Run the plotting scripts from MATLAB.
+The plotting scripts are run from MATLAB.
 
 Example:
 
@@ -252,7 +253,7 @@ the few things that differ between capacitors:
 - output file names
 - optional animation export for `400F`
 
-The common MATLAB plotting code lives in:
+The shared MATLAB plotting code lives in:
 
 ```text
 plotting/plot_soc_measured.m
@@ -267,25 +268,25 @@ writes PDFs to a local `Figures` folder.
 
 Some scripts ask which SOC values to omit from a plot.
 
-For runs without prompts:
+For runs without prompts, these environment variables can be used:
 
 ```bash
 EIS_SKIP_PROMPTS=1 EIS_OMIT_SOC=none matlab -batch "run('400F/SOC/SOCFitPlot.m')"
 ```
 
-Older plot variants and one-off analysis scripts are in `plot_variants/`
+Plot variants and analysis scripts are in `plot_variants/`
 folders under each `SOC` folder. These include frequency-label plots,
 legend-layout variants, `MaxPower.m`, `RelativeError.m`, and `PlottingBasic.m`.
 They call the common plotting files and save PDFs to `Figures/`.
 
-The normal scripts to start with are still:
+The standard scripts to start with are:
 
 ```text
 <capacitance>F/SOC/SOCPlot.m
 <capacitance>F/SOC/SOCFitPlot.m
 ```
 
-To generate all plot variants without opening MATLAB plot windows:
+All plot variants can also be generated without opening MATLAB plot windows:
 
 ```matlab
 run('tests/generate_matlab_plot_variants.m')
@@ -293,27 +294,6 @@ run('tests/generate_matlab_plot_variants.m')
 
 This writes PDFs to the `Figures/` folders so they can be inspected
 afterward.
-
-## Using Another Capacitor
-
-The scripts are still written around this repo's file naming pattern, but the
-main MATLAB and Python code is no longer copied into every capacitor folder.
-
-For another capacitor, create the same folder layout:
-
-```text
-<capacitance>F/SOC/<SOC>%SOC/
-```
-
-Then add small scripts in `<capacitance>F/SOC/`:
-
-- Python: copy the closest `fit_*.py` file and adjust the circuit, guesses,
-  bounds, and parameter names.
-- MATLAB: copy `SOCPlot.m` and `SOCFitPlot.m` from the closest capacitor and
-  adjust the settings at the top.
-
-The common Python fitting/table code is in `eis_fit.py` and `eis_tables.py`.
-The common MATLAB plotting code is in `plotting/`.
 
 ## Tables
 
@@ -344,25 +324,25 @@ These scripts write `.tex` files into the same `SOC` folder.
 
 ## Checks
 
-To check the Python scripts:
+A small Python check is available:
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
-This checks that the Python fit/table scripts load and that sample impedance
-data can be read.
+It checks that the Python fit/table scripts load and that sample impedance data
+can be read.
 
-To generate the main MATLAB plots without opening plot windows:
+The main MATLAB plots can be generated without opening plot windows:
 
 ```bash
 matlab -batch "run('tests/generate_main_matlab_plots.m')"
 ```
 
 This checks the main `.m` files and then runs the six main plotting scripts.
-Figures are hidden. PDFs are written to the `Figures` folders.
+Figures stay hidden. PDFs are written to the `Figures` folders.
 
-To generate the plot variants without opening plot windows:
+The plot variants can be generated the same way:
 
 ```bash
 matlab -batch "run('tests/generate_matlab_plot_variants.m')"
@@ -372,9 +352,8 @@ The MATLAB checks are local because they need MATLAB.
 
 ## Notes And Limitations
 
-- This is a research/thesis repo, not a packaged Python library.
-- The data layout matters. Renaming folders will break scripts
-  unless the paths are updated.
+- This repo is script-based and assumes the folder layout shown above.
+- The data layout matters. Renaming folders may require path updates.
 - The MATLAB files in `plotting/` replace the Professional Plots functions used
   while making the original figures.
 - The Python fitting scripts contain model choices, bounds, and initial guesses
