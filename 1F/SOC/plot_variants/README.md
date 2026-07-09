@@ -1,6 +1,6 @@
 # 1F SOC Plot Variants
 
-This folder holds older or one-off MATLAB plotting scripts for the 1F data.
+This folder holds optional MATLAB plot scripts for the 1F data.
 
 The main SOC scripts live one level up:
 
@@ -9,9 +9,12 @@ The main SOC scripts live one level up:
 
 ## Scripts
 
-| Script | Use | Batch status |
+| Script | Use | Check |
 | --- | --- | --- |
-| `PlottingBasic.m` | Older basic measured-data plot. | Fails unless `SingleTest-Vertification/fitted_dataBasic.csv` is restored. |
+| `PlottingBasic.m` | Basic measured-data plot. | Saves a PDF to `Figures/`. |
+
+This is a short script that calls the common plotting files in `plotting/`.
+For normal use, start with `SOCPlot.m` and `SOCFitPlot.m`.
 
 Run variants from the parent `SOC` folder:
 
@@ -20,4 +23,4 @@ cd 1F/SOC
 run('plot_variants/PlottingBasic.m')
 ```
 
-Batch status was checked with `tests/audit_matlab_variants.m`.
+`tests/audit_matlab_variants.m` runs this script with MATLAB figures hidden.

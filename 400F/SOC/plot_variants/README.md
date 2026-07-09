@@ -1,7 +1,6 @@
 # 400F SOC Plot Variants
 
-This folder holds publication-style plot variants and one-off analysis scripts
-for the 400F data.
+This folder holds optional MATLAB plot scripts for the 400F data.
 
 The main SOC scripts live one level up:
 
@@ -10,15 +9,15 @@ The main SOC scripts live one level up:
 
 ## Scripts
 
-| Script | Use | Batch status |
+| Script | Use | Check |
 | --- | --- | --- |
-| `SOCFitPlot_VerticalLegend.m` | Fit plot with a vertical publication legend. | Fails in batch on old axis-limit handling. |
-| `SOCPlot_FrequencyLabel.m` | Measured-data plot with frequency labels and draggable annotations. | Fails in batch; old manual annotation workflow. |
-| `RelativeError.m` | One-off relative-error analysis plot. | Interactive; asks for omitted SOC values with a dialog. |
-| `MaxPower.m` | One-off max-power analysis plot. | Runs in batch. |
+| `SOCFitPlot_VerticalLegend.m` | Fit plot kept for the older output name. | Saves a PDF to `Figures/`. |
+| `SOCPlot_FrequencyLabel.m` | Measured-data plot with frequency labels. | Saves a PDF to `Figures/`. |
+| `RelativeError.m` | Relative-error plot from fitted error CSVs. | Saves a PDF to `Figures/`. |
+| `MaxPower.m` | Max-power plot from fitted `R_0` values. | Saves a PDF to `Figures/`. |
 
-The frequency-label script has manual/interactive annotation code. The normal
-entry points are still `SOCPlot.m` and `SOCFitPlot.m`.
+These are short scripts that call the common plotting files in `plotting/`. For
+normal use, start with `SOCPlot.m` and `SOCFitPlot.m`.
 
 Run variants from the parent `SOC` folder:
 
@@ -27,4 +26,4 @@ cd 400F/SOC
 run('plot_variants/SOCFitPlot_VerticalLegend.m')
 ```
 
-Batch status was checked with `tests/audit_matlab_variants.m`.
+`tests/audit_matlab_variants.m` runs these scripts with MATLAB figures hidden.
