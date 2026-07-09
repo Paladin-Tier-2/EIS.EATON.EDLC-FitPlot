@@ -2,7 +2,6 @@
 
 This repo contains electrochemical impedance spectroscopy (EIS) data and scripts
 used for fitting and plotting EATON electric double-layer capacitors (EDLCs).
-It started as bachelor-thesis work in a battery and power-electronics setting.
 
 The work is split between MATLAB and Python:
 
@@ -29,7 +28,7 @@ The repo includes measured data and generated fit outputs for `1F`, `60F`, and
   </tr>
 </table>
 
-This work is connected to this paper:
+Related paper:
 [EIS-Based State of Charge Characterization of Electric Double-Layer Capacitors](https://ieeexplore.ieee.org/abstract/document/11238903).
 
 ## Quick Start
@@ -66,17 +65,13 @@ For new measurement exports:
 
 ## Requirements
 
-Python packages:
-
-- `impedance`
-- `numpy`
-- `pandas`
-- `matplotlib`
+Python packages are listed in `requirements.txt` and installed in the Quick
+Start command above.
 
 MATLAB:
 
 - MATLAB with `readtable`, `readmatrix`, and standard plotting functions.
-- The original plotting scripts used the addon MATLAB Professional Plots:
+- The original plotting scripts used the MATLAB Professional Plots add-on:
   `PLOT_STANDARDS`, `STANDARDIZE_FIGURE`, and `SAVE_MY_FIGURE`.
 - This repo includes small local replacements in `plotting/`, so the plots can
   run from a fresh clone without that external setup.
