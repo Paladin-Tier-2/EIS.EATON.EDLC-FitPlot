@@ -1,5 +1,5 @@
-function run_matlab_smoke()
-%RUN_MATLAB_SMOKE Run the main MATLAB plot scripts.
+function generate_main_matlab_plots()
+%GENERATE_MAIN_MATLAB_PLOTS Run the main MATLAB plot scripts.
 %
 % Figures are hidden during the run. Inspect the generated PDFs in each
 % Figures folder afterward.

@@ -23,4 +23,4 @@ cd 1F/SOC
 run('plot_variants/PlottingBasic.m')
 ```
 
-`tests/audit_matlab_variants.m` runs this script with MATLAB figures hidden.
+`tests/generate_matlab_plot_variants.m` runs this script with MATLAB figures hidden.

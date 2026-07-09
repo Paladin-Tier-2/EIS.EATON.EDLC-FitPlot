@@ -27,4 +27,4 @@ cd 60F/SOC
 run('plot_variants/SOCFitPlot_VerticalLegend.m')
 ```
 
-`tests/audit_matlab_variants.m` runs these scripts with MATLAB figures hidden.
+`tests/generate_matlab_plot_variants.m` runs these scripts with MATLAB figures hidden.

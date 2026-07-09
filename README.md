@@ -14,9 +14,20 @@ The work is split between MATLAB and Python:
 The repo includes measured data and generated fit outputs for `1F`, `60F`, and
 `400F` capacitors at different states of charge.
 
-![60F measured data with Bisquert open-circuit fit](docs/figures/bisquert_fit_60f.svg)
-
-Measured 60F Nyquist data and the Bisquert open-circuit fit at different SOC levels.
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/figures/bisquert_fit_60f.svg" alt="60F measured data with Bisquert open-circuit fit">
+    </td>
+    <td width="50%">
+      <img src="docs/figures/holder_60f.svg" alt="60F holder used for EIS measurements">
+    </td>
+  </tr>
+  <tr>
+    <td>Measured 60F Nyquist data and the Bisquert open-circuit fit.</td>
+    <td>The 60F holder I made for the EIS measurements.</td>
+  </tr>
+</table>
 
 This work is connected to this paper:
 [EIS-Based State of Charge Characterization of Electric Double-Layer Capacitors](https://ieeexplore.ieee.org/abstract/document/11238903).
@@ -282,7 +293,7 @@ The normal scripts to start with are still:
 To generate all plot variants without opening MATLAB plot windows:
 
 ```matlab
-run('tests/audit_matlab_variants.m')
+run('tests/generate_matlab_plot_variants.m')
 ```
 
 This writes PDFs to the `Figures/` folders so they can be inspected
@@ -350,7 +361,7 @@ data can be read.
 To generate the main MATLAB plots without opening plot windows:
 
 ```bash
-matlab -batch "run('tests/run_matlab_smoke.m')"
+matlab -batch "run('tests/generate_main_matlab_plots.m')"
 ```
 
 This checks the main `.m` files and then runs the six main plotting scripts.
@@ -359,7 +370,7 @@ Figures are hidden. PDFs are written to the `Figures` folders.
 To generate the plot variants without opening plot windows:
 
 ```bash
-matlab -batch "run('tests/audit_matlab_variants.m')"
+matlab -batch "run('tests/generate_matlab_plot_variants.m')"
 ```
 
 The MATLAB checks are local because they need MATLAB.
@@ -377,9 +388,3 @@ The MATLAB checks are local because they need MATLAB.
   rerunning all fits.
 - Some plots have hand-picked legend and axis settings. Adjust those near the
   top of `SOCPlot.m` or `SOCFitPlot.m` when making a new figure.
-
-## Measurement Setup
-
-This is the 60F holder used for the EIS measurements.
-
-<img src="docs/figures/holder_60f.svg" alt="60F holder used for EIS measurements" width="520">

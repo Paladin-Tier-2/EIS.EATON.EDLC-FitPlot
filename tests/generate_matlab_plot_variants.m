@@ -1,5 +1,5 @@
-function audit_matlab_variants()
-%AUDIT_MATLAB_VARIANTS Run the plot variants and save their PDFs.
+function generate_matlab_plot_variants()
+%GENERATE_MATLAB_PLOT_VARIANTS Run the plot variants and save their PDFs.
 %
 % Figures are hidden during the run. Inspect the generated PDFs in each
 % Figures folder afterward.
